@@ -64,8 +64,6 @@ class ServerClientHandler implements Runnable{
     @Override
     public void run() {
         while (clientSocket.isConnected() && !clientSocket.isClosed()){
-            System.out.println("isConnected "+clientSocket.isConnected());
-            System.out.println("isClosed "+clientSocket.isClosed());
             try {
                 InputStream in = clientSocket.getInputStream();
                 // TODO 多线程的支持
