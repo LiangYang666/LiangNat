@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Description: TODO
@@ -18,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 @Slf4j
 public class NatServer {
-    static ConcurrentHashMap<Integer, Socket> serverPortMap = new ConcurrentHashMap<>();
+
     public static void main(String[] args) throws IOException {
 
         int port = 10101;
@@ -28,7 +27,7 @@ public class NatServer {
         while (true){
             Socket wanSocket = serverSocket.accept();
             log.info("Server\t接收到登录请求: "+ wanSocket );
-            new Thread(new ServerAcceptLoginHandler(wanSocket, serverPortMap)).start();
+            new Thread(new ServerClientHandler(wanSocket)).start();
 //            Socket lanSocket = new Socket("192.168.0.202",5905);
 //            new Thread(new NatServerWanHandler(wanSocket.getInputStream(), lanSocket.getOutputStream())).start();
 //            new Thread(new NatServerLanHandler(lanSocket.getInputStream(), wanSocket.getOutputStream())).start();
