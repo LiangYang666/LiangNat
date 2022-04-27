@@ -20,8 +20,8 @@ public class NatClient {
         String serverAddress = "127.0.0.1";
         int serverPort = 10101;
         ArrayList<ClientPortMapConfig> portWantMap = new ArrayList<>();
-        portWantMap.add(new ClientPortMapConfig("vnc5905", "192.168.0.202", 45905, 5905));
-        portWantMap.add(new ClientPortMapConfig("vnc5901", "192.168.0.202", 45901, 5901));
+        portWantMap.add(new ClientPortMapConfig("vnc5905", "192.168.0.202", 5905, 45905));
+        portWantMap.add(new ClientPortMapConfig("vnc5901", "192.168.0.202", 5901, 45901));
         ClientConfig clientConfig = new ClientConfig(serverAddress, serverPort, portWantMap);
         try {
             Socket clientSocket = new Socket(serverAddress, serverPort);
@@ -32,6 +32,7 @@ public class NatClient {
             for (int i = 0; i < clientConfig.portMap.size(); i++) {
                 out.write(ByteUtil.intToByteArray(clientConfig.portMap.get(i).remotePort));
             }
+            while (true);
 
         } catch (IOException e) {
             e.printStackTrace();
