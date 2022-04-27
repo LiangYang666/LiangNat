@@ -83,7 +83,7 @@ class ServerClientHandler implements Runnable{
                         clientSocket.close();
                     }
                     log.info("Server\t共监听{}个端口",listenCount);
-                } else if(eventIndex == MessageFlag.eventAccept){
+                } else if(eventIndex == MessageFlag.eventNewConnect){
 
                 } else if (eventIndex == MessageFlag.eventForward){
 

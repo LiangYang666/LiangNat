@@ -1,7 +1,5 @@
 package com.liang.common;
 
-import org.junit.Test;
-
 /**
  * @Description: TODO
  * @Author: LiangYang
@@ -14,7 +12,7 @@ public class MessageFlag {
     // 第2、3、4、5四个个字节表示需要监听端口的总数portCount
     // 之后的字节共有4*portCount 每个字节表示一个想要监听的端口
 
-    public static final Integer eventAccept = 2;
+    public static final Integer eventNewConnect = 2;
     // 标志为2时
     // 第2、3、4、5四个字节表示发生接收连接的端口号port
     // 第6个字节表示后面socket名称字符串的byte数组长度count
