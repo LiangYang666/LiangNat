@@ -15,11 +15,11 @@ import java.net.Socket;
  * @Date: 2022/4/27 下午6:43
  **/
 @Slf4j
-public class ServerListenNewConnectHandler implements Runnable{
+public class ServerListenRemotePortAcceptHandler implements Runnable{
     private ServerSocket listenSocket;
     private Socket clientSocket;
     int port;
-    public ServerListenNewConnectHandler(ServerSocket listenSocket) {
+    public ServerListenRemotePortAcceptHandler(ServerSocket listenSocket) {
         this.listenSocket = listenSocket;
         port = listenSocket.getLocalPort();
         clientSocket = ServerMapUtil.serverPortMap.get(port);
@@ -35,19 +35,22 @@ public class ServerListenNewConnectHandler implements Runnable{
                 assert socketWan.isConnected();
                 String socketWanStr = socketWan.toString();
                 ServerMapUtil.socketWanMap.put(socketWanStr, socketWan);
-                Socket clientSocket = ServerMapUtil.serverPortMap.get(port);
-                if (clientSocket.isConnected() && !clientSocket.isClosed()){
-                    OutputStream out = clientSocket.getOutputStream();
+                Socket server2clientSocket = ServerMapUtil.serverPortMap.get(port);
+                if (server2clientSocket.isConnected() && !server2clientSocket.isClosed()){
+                    OutputStream out = server2clientSocket.getOutputStream();
                     byte[] bytes = socketWanStr.getBytes();
                     synchronized (out){
                         out.write(ByteUtil.intToByte(MessageFlag.eventNewConnect));
                         out.write(ByteUtil.intToByteArray(port));
                         out.write(ByteUtil.intToByte(bytes.length));
                         out.write(bytes);
+    //                    out.flush();
+                        log.trace("Server\t新连接请求发送完成");
                     }
 //                    out.flush();
+                    new Thread(new Server2ClientForwarder(socketWan)).start();
                 } else {
-                    log.info("Server\t客户端断开了连接->{}", clientSocket);
+                    log.info("Server\t客户端断开了连接->{}", server2clientSocket);
                     break;
                 }
             } catch (IOException e) {
