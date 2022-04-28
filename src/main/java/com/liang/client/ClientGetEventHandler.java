@@ -23,24 +23,23 @@ public class ClientGetEventHandler implements Runnable{
         log.info("Client\t开始事件监听");
     }
     public void newConnectHandler(InputStream in) throws IOException {
-//        log.trace("trace read  {}", in.read(new byte[5]));
         log.trace("Client\t进入新连接处理");
         int read;
         byte[] portBytes = new byte[4];
         read = in.read(portBytes);
         if (read != 4) {
-            log.info("Server\t新连接事件异常");
+            log.warn("Server\t新连接事件异常");
             return;
         }
         int count = in.read();
         if (count == -1) {
-            log.info("Server\t新连接事件异常，count=-1");
+            log.warn("Server\t新连接事件异常，count=-1");
             return;
         }
         byte[] remoteSocketStrBytes = new byte[count];
         read = in.read(remoteSocketStrBytes);
         if (count!=read){
-            log.info("Server\t新连接事件异常，远程socket信息数据长度不足");
+            log.warn("Server\t新连接事件异常，远程socket信息数据长度不足");
             return;
         }
         int remotePort = ByteUtil.byteArrayToInt(portBytes);
@@ -84,7 +83,7 @@ public class ClientGetEventHandler implements Runnable{
         OutputStream out = socketLan.getOutputStream();
         out.write(bytes, 0, read);
         out.flush();
-        log.info("Client\t本次转发事件完成，转发长度{},转发携带{}，转发至{}", read, new String(nameBytes), socketLan);
+        log.trace("Client\t本次转发事件完成，转发长度{},转发携带{}，转发至{}", read, new String(nameBytes), socketLan);
     }
     @Override
     public void run() {
@@ -97,7 +96,7 @@ public class ClientGetEventHandler implements Runnable{
                     log.warn("Client\tsocket对应的输入流关闭: {}，将关闭socket ",client2serverSocket);
                     client2serverSocket.close();
                 }
-                log.info("Client\t事件索引： " + eventIndex);
+                log.trace("Client\t事件索引： " + eventIndex);
                 if (eventIndex == MessageFlag.eventNewConnect){
 //                    log.trace("trace read  {}", in.read(new byte[4]));
                     newConnectHandler(in);

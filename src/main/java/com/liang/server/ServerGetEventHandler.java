@@ -31,14 +31,14 @@ class ServerGetEventHandler implements Runnable{
         byte[] countBytes = new byte[4];
         read = in.read(countBytes);
         if (read == -1) {
-            log.info("Server\t客户端登录事件异常");
+            log.warn("Server\t客户端登录事件异常");
             return -1;
         }
         int count = ByteUtil.byteArrayToInt(countBytes);
         byte[] portsBytes = new byte[count * 4];
         read = in.read(portsBytes);
         if (read != count * 4) {
-            log.info("Server\t客户端登录事件异常,数据长度不足");
+            log.warn("Server\t客户端登录事件异常,数据长度不足");
             return -1;
         }
         int listenCount = 0;
@@ -52,7 +52,7 @@ class ServerGetEventHandler implements Runnable{
                 listenSuccessFlag = true;
             } catch (IOException e) {
                 e.printStackTrace();
-                log.info("Server\t监听端口失败: " + port);
+                log.warn("Server\t监听端口失败: " + port);
             }
             if (listenSuccessFlag) {
                 ServerMapUtil.serverPortMap.put(port, clientSocket);    //记录该端口是这个客户端要监听的
@@ -96,7 +96,7 @@ class ServerGetEventHandler implements Runnable{
         OutputStream out = socketWan.getOutputStream();
         out.write(bytes, 0, read);
         out.flush();
-        log.info("Server\t本次转发事件完成，转发长度{},转发携带socket名称{},转发至{}", read, new String(nameBytes),socketWan);
+        log.trace("Server\t本次转发事件完成，转发长度{},转发携带socket名称{},转发至{}", read, new String(nameBytes),socketWan);
     }
 
 
@@ -112,7 +112,7 @@ class ServerGetEventHandler implements Runnable{
                     log.info("Server\tsocket对应的输入流关闭: {} ",clientSocket);
                     clientSocket.close();
                 }
-                log.info("Server\t事件索引： " + eventIndex);
+                log.trace("Server\t事件索引： " + eventIndex);
 
                 if (eventIndex == MessageFlag.eventLogin) {
                     log.info("Server\t客户端登录事件发生");
@@ -125,7 +125,7 @@ class ServerGetEventHandler implements Runnable{
                 } else if (eventIndex == MessageFlag.eventForward){
                     forward(in);
                 } else {
-                    log.info("Server\t非正常事件标志 [{}]", eventIndex);
+                    log.warn("Server\t非正常事件标志 [{}]", eventIndex);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
