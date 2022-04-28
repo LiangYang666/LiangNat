@@ -9,7 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date: 2022/4/27 下午10:24
  **/
 public class ClientMapUtil {
-    static ConcurrentHashMap<Socket, byte[]> socketLanMap = new ConcurrentHashMap<>(); // 键为本地socket，String为云端对应的socket
+    static ConcurrentHashMap<Socket, byte[]> socketLanMap = new ConcurrentHashMap<>(); // 键为本地socket，值为云端对应的socket
+    static ConcurrentHashMap<String, Socket> socketStringLanMap = new ConcurrentHashMap<>(); // 键为云端对应的socket名称，值为本地socket
     static ConcurrentHashMap<Integer, ClientPortMapConfig> remotePortMap = new ConcurrentHashMap<>(); // 键为本地云端端口，值为客户端端口配置
 
 }
