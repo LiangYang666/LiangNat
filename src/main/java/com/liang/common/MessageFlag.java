@@ -19,4 +19,9 @@ public class MessageFlag {
     // 之后的count个字节表示socket名称的字节数组
 
     public static final Integer eventForward = 3;
+    // 标志为3时
+    // 第2个字节表示 云端socket名称byte数组的长度nameCount
+    // 后面nameCount个字节表示云端socket名称
+    // 再后面4个字节表示消息内容的长度dataCount，最长为1000长度
+    // 之后的dataCount个字节表示socket名称的字节数组
 }
