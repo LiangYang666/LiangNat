@@ -32,7 +32,7 @@
 
 
     <!-- 日志输出级别 -->
-    <root level="INFO">
+    <root level="TRACE">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE"/>
     </root>
