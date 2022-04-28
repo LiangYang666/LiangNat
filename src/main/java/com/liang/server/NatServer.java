@@ -26,64 +26,8 @@ public class NatServer {
 
         while (true){
             Socket wanSocket = serverSocket.accept();
-            log.info("Server\t接收到登录请求: "+ wanSocket );
-            new Thread(new ServerClientHandler(wanSocket)).start();
-//            Socket lanSocket = new Socket("192.168.0.202",5905);
-//            new Thread(new NatServerWanHandler(wanSocket.getInputStream(), lanSocket.getOutputStream())).start();
-//            new Thread(new NatServerLanHandler(lanSocket.getInputStream(), wanSocket.getOutputStream())).start();
+            log.info("Server\t接收到登录请求: "+ wanSocket);
+            new Thread(new ServerGetEventHandler(wanSocket)).start();   // 开启事件监听
         }
     }
 }
-
-class NatServerWanHandler implements Runnable{
-    InputStream wanInputStream;
-    OutputStream lanOutputStream;
-
-    public NatServerWanHandler(InputStream wanInputStream, OutputStream lanOutputStream) {
-        this.wanInputStream = wanInputStream;
-        this.lanOutputStream = lanOutputStream;
-    }
-
-    @Override
-    public void run() {
-        try {
-            while(true) {
-                byte[] bytes = new byte[1024];
-                int read = wanInputStream.read(bytes);
-                if (read>0){
-                    lanOutputStream.write(bytes, 0, read);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-}
-
-
-class NatServerLanHandler implements Runnable{
-    InputStream lanInputStream;
-    OutputStream wanOutputStream;
-
-    public NatServerLanHandler(InputStream lanInputStream, OutputStream wanOutputStream) {
-        this.lanInputStream = lanInputStream;
-        this.wanOutputStream = wanOutputStream;
-    }
-
-    @Override
-    public void run() {
-        try {
-            while(true) {
-                byte[] bytes = new byte[1024];
-                int read = lanInputStream.read(bytes);
-                if (read>0){
-                    wanOutputStream.write(bytes, 0, read);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-}
-
