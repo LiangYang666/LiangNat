@@ -62,14 +62,14 @@ public class ClientGetEventHandler implements Runnable{
             log.warn("Client\t转发事件异常");
             return;
         }
-        Socket socketLan = ClientMapUtil.socketStringLanMap.get(new String(nameBytes));
-        OutputStream out = socketLan.getOutputStream();
         byte[] bytes = new byte[1024];
         read = in.read(bytes);
         if (read == -1) {
             log.warn("Client\t转发事件异常");
             return;
         }
+        Socket socketLan = ClientMapUtil.socketStringLanMap.get(new String(nameBytes));
+        OutputStream out = socketLan.getOutputStream();
         out.write(bytes, 0, read);
     }
     @Override
