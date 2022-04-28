@@ -21,6 +21,7 @@ public class Server2ClientForwarder implements Runnable{
     Socket socketWan;
     public Server2ClientForwarder(Socket socketWan) {
         this.socketWan = socketWan;
+        log.info("Server\t{}开启服务端向客户端的端口消息转发", socketWan);
     }
 
     @Override
@@ -33,17 +34,21 @@ public class Server2ClientForwarder implements Runnable{
                 InputStream in = socketWan.getInputStream();
                 int read = in.read(bytes);
                 if (read == -1){
-                    log.info("Server\t输入流被关闭，将关闭socket->{}", socketWan);
-                    socketWan.close();
+                    log.info("Server\t转发消息时，输入流结束，端口号为{}", socketWan.getLocalPort());
+                    continue;
+//                    socketWan.close();
                 }
                 OutputStream out = server2clientSocket.getOutputStream(); // TODO 这里是否需要查看client2serverSocket是否已经关闭
                 synchronized (out){
+                    log.trace("Server\t转发携带->{}",socketWan);
                     out.write(ByteUtil.intToByte(MessageFlag.eventForward));    // TODO 查看是否可以直接发
                     out.write(ByteUtil.intToByte(socketWanNames.length));
                     out.write(socketWanNames);
                     out.write(ByteUtil.intToByteArray(read));
                     out.write(bytes, 0, read);
+                    out.flush();
                 }
+                log.trace("Server\t云端端口转发消息成功，消息体长度{}，转发携带{}，转发至{}",read, socketWan, server2clientSocket);
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -18,6 +18,7 @@ import java.net.Socket;
 public class Client2ServerForwarder implements Runnable{
     Socket socketLan;
     public Client2ServerForwarder(Socket socketLan) {
+        log.info("Client\t{}开启客户端向服务端的端口消息转发", socketLan);
         this.socketLan = socketLan;
     }
 
@@ -29,9 +30,11 @@ public class Client2ServerForwarder implements Runnable{
                 InputStream in = socketLan.getInputStream();
                 int read = in.read(bytes);
                 if (read == -1){
-                    log.info("Client\t输入流被关闭，将关闭socket->{}", socketLan);
-                    socketLan.close();
+                    log.info("Client\t转发消息时，输入流结束，端口号为{},socket为{}", socketLan.getLocalPort(),socketLan);
+                    continue;
+//                    socketLan.close();
                 }
+
                 OutputStream out = NatClient.client2serverSocket.getOutputStream(); // TODO 这里是否需要查看client2serverSocket是否已经关闭
                 byte[] remoteSocketWanNames = ClientMapUtil.socketLanMap.get(socketLan);
                 synchronized (out){
@@ -40,7 +43,10 @@ public class Client2ServerForwarder implements Runnable{
                     out.write(remoteSocketWanNames);
                     out.write(ByteUtil.intToByteArray(read));
                     out.write(bytes, 0, read);
+                    out.flush();
                 }
+                log.trace("Client\t本地端口转发消息成功，消息体长度{}，转发携带{}，转发至{}",read, new String(remoteSocketWanNames), NatClient.client2serverSocket);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
