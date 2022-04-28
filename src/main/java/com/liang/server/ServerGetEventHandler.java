@@ -86,7 +86,7 @@ class ServerGetEventHandler implements Runnable{
             return;
         }
         int count = ByteUtil.byteArrayToInt(countBytes);
-        byte[] bytes = new byte[1024];
+        byte[] bytes = new byte[count];
         read = in.read(bytes);
         if (read != count) {
             log.warn("Server\t转发事件异常,消息长度不一致,消息头指定长度{}，真实读取长度{}",count, read);
