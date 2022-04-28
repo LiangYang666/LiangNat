@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 public class ServerMapUtil {
 
-    static ConcurrentHashMap<Integer, Socket> serverPortMap = new ConcurrentHashMap<>();  // 端口和socket匹配对，指示某些端口是哪些客户端socket想要监听的
+    static ConcurrentHashMap<Integer, Socket> serverPortMap = new ConcurrentHashMap<>();  // 端口和socket匹配对，指示某些端口25901是哪些客户端socket想要监听的
     static ConcurrentHashMap<String, Socket> socketWanMap = new ConcurrentHashMap<>();  // 服务端监听的穿透端口(客户端想监听的，例如25901)，
     // 这样的端口每来一个新连接请求，将socket的名称，map对应的socket， 每次转发消息时携带这个socket的名称字符串，就知道是这个socket发的消息
 
