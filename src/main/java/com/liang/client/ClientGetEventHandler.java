@@ -20,12 +20,15 @@ public class ClientGetEventHandler implements Runnable{
 
     public ClientGetEventHandler(Socket socket) {
         this.client2serverSocket = socket;
+        log.info("Client\t开始事件监听");
     }
     public void newConnectHandler(InputStream in) throws IOException {
+//        log.trace("trace read  {}", in.read(new byte[5]));
+        log.trace("Client\t进入新连接处理");
         int read;
         byte[] portBytes = new byte[4];
         read = in.read(portBytes);
-        if (read == -1) {
+        if (read != 4) {
             log.info("Server\t新连接事件异常");
             return;
         }
@@ -45,10 +48,12 @@ public class ClientGetEventHandler implements Runnable{
         String localIp = ClientMapUtil.remotePortMap.get(remotePort).getLocalIp();
         Socket socket = new Socket(localIp, localPort);
         // TODO 判断是否连接成功
+        new Thread(new Client2ServerForwarder(socket)).start();
         ClientMapUtil.socketLanMap.put(socket, remoteSocketStrBytes);
         ClientMapUtil.socketStringLanMap.put(new String(remoteSocketStrBytes), socket);
     }
     public void forward(InputStream in) throws IOException {
+        log.trace("Client\t处理转发事件");
         int read;
         read = in.read();
         if (read == -1) {
@@ -62,15 +67,24 @@ public class ClientGetEventHandler implements Runnable{
             log.warn("Client\t转发事件异常");
             return;
         }
+        byte[] countBytes = new byte[4];
+        read = in.read(countBytes);
+        if (read != 4) {
+            log.warn("Client\t转发事件异常，消息体长度未指定");
+            return;
+        }
+        int count = ByteUtil.byteArrayToInt(countBytes);
         byte[] bytes = new byte[1024];
         read = in.read(bytes);
-        if (read == -1) {
-            log.warn("Client\t转发事件异常");
+        if (read != count) {
+            log.warn("Client\t转发事件异常,消息长度不一致,消息头指定长度{}，真实读取长度{}",count, read);
             return;
         }
         Socket socketLan = ClientMapUtil.socketStringLanMap.get(new String(nameBytes));
         OutputStream out = socketLan.getOutputStream();
         out.write(bytes, 0, read);
+        out.flush();
+        log.info("Client\t本次转发事件完成，转发长度{},转发携带{}，转发至{}", read, new String(nameBytes), socketLan);
     }
     @Override
     public void run() {
@@ -85,6 +99,7 @@ public class ClientGetEventHandler implements Runnable{
                 }
                 log.info("Client\t事件索引： " + eventIndex);
                 if (eventIndex == MessageFlag.eventNewConnect){
+//                    log.trace("trace read  {}", in.read(new byte[4]));
                     newConnectHandler(in);
                 } else if (eventIndex == MessageFlag.eventForward){
                     forward(in);
