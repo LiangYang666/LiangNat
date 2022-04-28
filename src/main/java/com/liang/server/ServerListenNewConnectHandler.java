@@ -23,6 +23,7 @@ public class ServerListenNewConnectHandler implements Runnable{
         this.listenSocket = listenSocket;
         port = listenSocket.getLocalPort();
         clientSocket = ServerMapUtil.serverPortMap.get(port);
+        log.info("Server\t开启线程处理端口 [{}]", port);
     }
 
     @Override
