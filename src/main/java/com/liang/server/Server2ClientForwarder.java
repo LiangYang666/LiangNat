@@ -35,12 +35,12 @@ public class Server2ClientForwarder implements Runnable{
                 int read = in.read(bytes);
                 if (read == -1){
                     log.info("Server\t转发消息时，输入流结束，端口号为{}", socketWan.getLocalPort());
-                    continue;
-//                    socketWan.close();
+                    socketWan.close();
+                    break;
                 }
                 OutputStream out = server2clientSocket.getOutputStream(); // TODO 这里是否需要查看client2serverSocket是否已经关闭
+                log.trace("Server\t转发携带->{}",socketWan);
                 synchronized (out){
-                    log.trace("Server\t转发携带->{}",socketWan);
                     out.write(ByteUtil.intToByte(MessageFlag.eventForward));    // TODO 查看是否可以直接发
                     out.write(ByteUtil.intToByte(socketWanNames.length));
                     out.write(socketWanNames);
