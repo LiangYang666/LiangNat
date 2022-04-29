@@ -66,17 +66,15 @@ class ServerGetEventHandler implements Runnable{
 
     public void forward(InputStream in) throws IOException {
         log.trace("Server\t处理转发事件");
-        int read;
-        read = in.read();
-        if (read == -1) {
-            log.warn("Server\t转发事件异常");
+        int nameCount = in.read();
+        if (nameCount == -1) {
+            log.warn("Server\t转发事件异常，socket名称长度未指定");
             return;
         }
-        int nameCount = read;
         byte[] nameBytes = new byte[nameCount];
-        read = in.read(nameBytes);
+        int read = in.read(nameBytes);
         if (read != nameCount) {
-            log.warn("Server\t转发事件异常");
+            log.warn("Server\t转发事件异常，socket名称获取失败");
             return;
         }
         byte[] countBytes = new byte[4];
@@ -98,7 +96,24 @@ class ServerGetEventHandler implements Runnable{
         out.flush();
         log.trace("Server\t本次转发事件完成，消息体长度{},转发携带{},转发至{}", read, new String(nameBytes),socketWan);
     }
-
+    public void closeConnect(InputStream in) throws IOException {
+        log.trace("Server\t处理关闭连接事件");
+        int nameCount = in.read();
+        if (nameCount == -1) {
+            log.warn("Server\t关闭连接事件异常，socket名称长度未指定");
+            return;
+        }
+        byte[] nameBytes = new byte[nameCount];
+        int read = in.read(nameBytes);
+        if (read != nameCount) {
+            log.warn("Server\t关闭连接事件异常，socket名称获取失败");
+            return;
+        }
+        Socket socketWan = ServerMapUtil.socketWanMap.get(new String(nameBytes));
+        ServerMapUtil.socketWanMap.remove(new String(nameBytes));
+        socketWan.close();
+        log.info("Server\t处理关闭连接事件完成，成功关闭并移除socketWan{}", socketWan);
+    }
 
     @Override
     public void run() {
@@ -112,7 +127,7 @@ class ServerGetEventHandler implements Runnable{
                     log.info("Server\tsocket对应的输入流关闭: {} ",clientSocket);
                     clientSocket.close();
                 }
-                log.trace("Server\t事件发生: " + MessageFlag.getComment(eventIndex));
+                log.trace("Server\t收到事件: " + MessageFlag.getComment(eventIndex));
                 if (eventIndex == MessageFlag.eventLogin) {
                     log.info("Server\t客户端登录事件发生");
                     int listenCount = loginHandler(in);
@@ -121,7 +136,9 @@ class ServerGetEventHandler implements Runnable{
                         clientSocket.close();
                     }
                     log.info("Server\t共监听{}个端口",listenCount);
-                } else if (eventIndex == MessageFlag.eventForward){
+                } else if (eventIndex == MessageFlag.eventCloseConnect){
+                    closeConnect(in);
+                }  else if (eventIndex == MessageFlag.eventForward){
                     forward(in);
                 } else {
                     log.warn("Server\t非正常事件标志 [{}]", eventIndex);
