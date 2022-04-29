@@ -33,26 +33,34 @@ public class Server2ClientForwarder implements Runnable{
             try {
                 InputStream in = socketWan.getInputStream();
                 int read = in.read(bytes);
+                OutputStream out = server2clientSocket.getOutputStream(); // TODO 这里是否需要查看client2serverSocket是否已经关闭
                 if (read == -1){
-                    log.info("Server\t转发消息时，输入流结束，端口号为{}", socketWan.getLocalPort());
+                    log.info("Server\t转发消息时，云端口[{}]输入流结束，关闭该socketWan ->{}", socketWan.getLocalPort(), socketWan);
                     socketWan.close();
+                    synchronized (out){
+                        out.write(MessageFlag.eventCloseConnect);
+                        out.write(socketWanNames.length);
+                        out.write(socketWanNames);
+//                        out.flush();
+                    }
+                    log.info("Server\t转发关闭连接标志，携带[{}]", socketWan);
                     break;
                 }
-                OutputStream out = server2clientSocket.getOutputStream(); // TODO 这里是否需要查看client2serverSocket是否已经关闭
                 log.trace("Server\t转发携带->{}",socketWan);
                 synchronized (out){
-                    out.write(ByteUtil.intToByte(MessageFlag.eventForward));    // TODO 查看是否可以直接发
-                    out.write(ByteUtil.intToByte(socketWanNames.length));
+                    out.write(MessageFlag.eventForward);    // TODO 查看是否可以直接发
+                    out.write(socketWanNames.length);
                     out.write(socketWanNames);
                     out.write(ByteUtil.intToByteArray(read));
                     out.write(bytes, 0, read);
-                    out.flush();
+//                    out.flush();
                 }
                 log.trace("Server\t云端端口转发消息成功，消息体长度{}，转发携带{}，转发至{}",read, socketWan, server2clientSocket);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        ServerMapUtil.socketWanMap.remove(socketWan.toString());
         log.info("Server\t本次穿透连接关闭，socket->{}", socketWan);
     }
 }
