@@ -113,8 +113,7 @@ public class ClientGetEventHandler implements Runnable{
                     log.warn("Client\tsocket对应的输入流关闭: {}，将关闭socket ",client2serverSocket);
                     client2serverSocket.close();
                 }
-                log.trace("Client\t事件索引： " + eventIndex);
-
+                log.trace("Client\t收到事件: " + MessageFlag.getComment(eventIndex));
 
                 if (eventIndex == MessageFlag.eventNewConnect){
                     newConnectHandler(in);
