@@ -89,14 +89,14 @@ class ServerGetEventHandler implements Runnable{
         byte[] bytes = new byte[count];
         read = in.read(bytes);
         if (read != count) {
-            log.warn("Server\t转发事件异常,消息长度不一致,消息头指定长度{}，真实读取长度{}",count, read);
+            log.warn("Server\t转发事件异常,消息长度不一致,消息头指定长度{}，实际读取长度{}",count, read);
             return;
         }
         Socket socketWan = ServerMapUtil.socketWanMap.get(new String(nameBytes));
         OutputStream out = socketWan.getOutputStream();
         out.write(bytes, 0, read);
         out.flush();
-        log.trace("Server\t本次转发事件完成，转发长度{},转发携带socket名称{},转发至{}", read, new String(nameBytes),socketWan);
+        log.trace("Server\t本次转发事件完成，消息体长度{},转发携带{},转发至{}", read, new String(nameBytes),socketWan);
     }
 
 
@@ -112,8 +112,7 @@ class ServerGetEventHandler implements Runnable{
                     log.info("Server\tsocket对应的输入流关闭: {} ",clientSocket);
                     clientSocket.close();
                 }
-                log.trace("Server\t事件索引： " + eventIndex);
-
+                log.trace("Server\t事件发生: " + MessageFlag.getComment(eventIndex));
                 if (eventIndex == MessageFlag.eventLogin) {
                     log.info("Server\t客户端登录事件发生");
                     int listenCount = loginHandler(in);
