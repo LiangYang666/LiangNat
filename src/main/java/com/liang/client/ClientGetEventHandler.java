@@ -53,17 +53,15 @@ public class ClientGetEventHandler implements Runnable{
     }
     public void forward(InputStream in) throws IOException {
         log.trace("Client\t处理转发事件");
-        int read;
-        read = in.read();
-        if (read == -1) {
-            log.warn("Client\t转发事件异常");
+        int nameCount = in.read();
+        if (nameCount == -1) {
+            log.warn("Client\t转发事件异常，socket名称长度未指定");
             return;
         }
-        int nameCount = read;
         byte[] nameBytes = new byte[nameCount];
-        read = in.read(nameBytes);
+        int read = in.read(nameBytes);
         if (read != nameCount) {
-            log.warn("Client\t转发事件异常");
+            log.warn("Client\t转发事件异常，socket名称获取失败");
             return;
         }
         byte[] countBytes = new byte[4];
@@ -85,6 +83,25 @@ public class ClientGetEventHandler implements Runnable{
         out.flush();
         log.trace("Client\t本次转发事件完成，转发长度{},转发携带{}，转发至{}", read, new String(nameBytes), socketLan);
     }
+    public void closeConnect(InputStream in) throws IOException {
+        log.trace("Client\t处理关闭连接事件");
+        int nameCount = in.read();
+        if (nameCount == -1) {
+            log.warn("Client\t关闭连接事件异常，socket名称长度未指定");
+            return;
+        }
+        byte[] nameBytes = new byte[nameCount];
+        int read = in.read(nameBytes);
+        if (read != nameCount) {
+            log.warn("Client\t关闭连接事件异常，socket名称获取失败");
+            return;
+        }
+        Socket socketLan = ClientMapUtil.socketStringLanMap.get(new String(nameBytes));
+        ClientMapUtil.socketStringLanMap.remove(new String(nameBytes));
+        ClientMapUtil.socketLanMap.remove(socketLan);
+        socketLan.close();
+        log.info("Client\t处理关闭连接事件完成，成功关闭并移除socketLan{}", socketLan);
+    }
     @Override
     public void run() {
         while (client2serverSocket.isConnected() && !client2serverSocket.isClosed()) {
@@ -97,12 +114,15 @@ public class ClientGetEventHandler implements Runnable{
                     client2serverSocket.close();
                 }
                 log.trace("Client\t事件索引： " + eventIndex);
+
+
                 if (eventIndex == MessageFlag.eventNewConnect){
-//                    log.trace("trace read  {}", in.read(new byte[4]));
                     newConnectHandler(in);
+                } else if (eventIndex == MessageFlag.eventCloseConnect){
+                    closeConnect(in);
                 } else if (eventIndex == MessageFlag.eventForward){
                     forward(in);
-                } else {
+                }else {
                     log.warn("Client\t无效事件索引： " + eventIndex);
                 }
 
