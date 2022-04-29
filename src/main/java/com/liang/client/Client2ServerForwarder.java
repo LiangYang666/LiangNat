@@ -41,9 +41,10 @@ public class Client2ServerForwarder implements Runnable{
 //                        out.flush();
                     }
                     log.info("Client\t转发关闭连接标志，携带[{}]", new String(remoteSocketWanNameBytes));
+                    break;
                 }
                 synchronized (out){
-                    out.write(MessageFlag.eventForward);    // TODO 查看是否可以直接发
+                    out.write(MessageFlag.eventForward);
                     out.write(remoteSocketWanNameBytes.length);
                     out.write(remoteSocketWanNameBytes);
                     out.write(ByteUtil.intToByteArray(read));
