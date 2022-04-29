@@ -61,6 +61,6 @@ public class Server2ClientForwarder implements Runnable{
             }
         }
         ServerMapUtil.socketWanMap.remove(socketWan.toString());
-        log.info("Server\t本次穿透连接关闭，socket->{}", socketWan);
+        log.info("Server\t本次穿透连接关闭，线程退出，socket->{}", socketWan);
     }
 }
