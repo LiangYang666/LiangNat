@@ -78,6 +78,10 @@ public class ClientGetEventHandler implements Runnable{
             return;
         }
         Socket socketLan = ClientMapUtil.socketStringLanMap.get(new String(nameBytes));
+        if (socketLan==null || socketLan.isClosed()){
+            log.warn("Client\t转发事件异常"+new String(nameBytes)+"对应的socketLan"+(socketLan==null?"为null":socketLan+"已关闭"));
+            return;
+        }
         OutputStream out = socketLan.getOutputStream();
         out.write(bytes, 0, read);
         out.flush();

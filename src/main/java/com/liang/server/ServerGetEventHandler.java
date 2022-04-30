@@ -91,6 +91,10 @@ class ServerGetEventHandler implements Runnable{
             return;
         }
         Socket socketWan = ServerMapUtil.socketWanMap.get(new String(nameBytes));
+        if (socketWan==null || socketWan.isClosed()){
+            log.warn("Server\t转发事件异常"+new String(nameBytes)+"对应的socketWan"+(socketWan==null?"为null":socketWan+"已关闭"));
+            return;
+        }
         OutputStream out = socketWan.getOutputStream();
         out.write(bytes, 0, read);
         out.flush();
