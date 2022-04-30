@@ -16,26 +16,27 @@ import java.net.Socket;
  **/
 @Slf4j
 public class ServerListenRemotePortAcceptHandler implements Runnable{
-    private ServerSocket listenSocket;
-    private Socket clientSocket;
-    int port;
-    public ServerListenRemotePortAcceptHandler(ServerSocket listenSocket) {
+    private final ServerSocket listenSocket;
+    private final Socket server2clientSocket;
+    private final int port;
+    public ServerListenRemotePortAcceptHandler(ServerSocket listenSocket, Socket server2clientSocket) {
         this.listenSocket = listenSocket;
         port = listenSocket.getLocalPort();
-        clientSocket = ServerMapUtil.serverPortMap.get(port);
-        log.info("Server\t开启线程监听云端端口 [{}],与客户端进行信息交互的Socket为{}", port, clientSocket);
+        this.server2clientSocket = server2clientSocket;
+        log.info("Server\t开启线程监听云端端口 [{}],与客户端进行信息交互的Socket为{}", port, server2clientSocket);
     }
 
     @Override
     public void run() {
-        while  (clientSocket.isConnected() && !clientSocket.isClosed()){
+        while  (server2clientSocket.isConnected()
+                && !server2clientSocket.isClosed()
+                && !listenSocket.isClosed()){
             try {
                 Socket socketWan = listenSocket.accept();
                 log.info("Server\t云端端口[{}]接收到连接,生成socketWan:{}", port, socketWan);
                 assert socketWan.isConnected();
                 String socketWanStr = socketWan.toString();
                 ServerMapUtil.socketWanMap.put(socketWanStr, socketWan);
-                Socket server2clientSocket = ServerMapUtil.serverPortMap.get(port);     // 获取想要监听该端口的客户端socket
                 if (server2clientSocket.isConnected() && !server2clientSocket.isClosed()){
                     OutputStream out = server2clientSocket.getOutputStream();
                     byte[] bytes = socketWanStr.getBytes();
@@ -47,7 +48,7 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
 //                        out.flush();
                     }
                     log.trace("Server\t新连接请求发送完成");
-                    new Thread(new Server2ClientForwarder(socketWan)).start();
+                    new Thread(new Server2ClientForwarder(socketWan, server2clientSocket)).start();
                 } else {
                     log.warn("Server\t客户端断开了连接->{}", server2clientSocket);
                     break;

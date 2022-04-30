@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -19,10 +21,12 @@ import java.net.Socket;
 
 @Slf4j
 class ServerGetEventHandler implements Runnable{
-    Socket clientSocket;
+    private final Socket server2clientSocket;       // 该服务端处理线程使用的信息交互socket
+    private final List<ServerSocket> listenSocketList;    // 该信息交互通道上所有云端端口的监听serverSocket
 
-    public ServerGetEventHandler(Socket clientSocket) {
-        this.clientSocket = clientSocket;
+    public ServerGetEventHandler(Socket server2clientSocket) {
+        this.server2clientSocket = server2clientSocket;
+        listenSocketList = new ArrayList<>();
         log.info("Server\t开始事件监听");
     }
 
@@ -52,12 +56,13 @@ class ServerGetEventHandler implements Runnable{
                 listenSuccessFlag = true;
             } catch (IOException e) {
                 e.printStackTrace();
-                log.warn("Server\t监听端口失败: " + port);
+                log.warn("Server\t监听端口失败: " + port+ ", " +e.getMessage());
             }
             if (listenSuccessFlag) {
-                ServerMapUtil.serverPortMap.put(port, clientSocket);    //记录该端口是这个客户端要监听的
                 log.info("Server\t监听端口成功: {}" ,port);
-                new Thread(new ServerListenRemotePortAcceptHandler(serverSocket)).start();
+                Thread thread = new Thread(new ServerListenRemotePortAcceptHandler(serverSocket, server2clientSocket), "Thread-listen["+port+"]");
+                thread.start();
+                listenSocketList.add(serverSocket);
                 listenCount++;
             }
         }
@@ -100,6 +105,7 @@ class ServerGetEventHandler implements Runnable{
         out.flush();
         log.trace("Server\t本次转发事件完成，消息体长度{},转发携带{},转发至{}", read, new String(nameBytes),socketWan);
     }
+
     public void closeConnect(InputStream in) throws IOException {
         log.trace("Server\t处理关闭连接事件");
         int nameCount = in.read();
@@ -121,23 +127,22 @@ class ServerGetEventHandler implements Runnable{
 
     @Override
     public void run() {
-        while (clientSocket.isConnected() && !clientSocket.isClosed()){
+        while (server2clientSocket.isConnected() && !server2clientSocket.isClosed()){
             try {
-                InputStream in = clientSocket.getInputStream();
-                // TODO 多线程的支持
+                InputStream in = server2clientSocket.getInputStream();
                 int eventIndex;
                 eventIndex = in.read();
                 if (eventIndex==-1) {
-                    log.info("Server\tsocket对应的输入流关闭: {} ",clientSocket);
-                    clientSocket.close();
+                    log.info("Server\tsocket对应的输入流关闭: {} ", server2clientSocket);
+                    server2clientSocket.close();
                 }
                 log.trace("Server\t收到事件: " + MessageFlag.getComment(eventIndex));
                 if (eventIndex == MessageFlag.eventLogin) {
                     log.info("Server\t客户端登录事件发生");
                     int listenCount = loginHandler(in);
                     if (listenCount<=0){
-                        log.info("Server\t无监听事件，关闭当前客户端 {}", clientSocket);
-                        clientSocket.close();
+                        log.info("Server\t无监听事件，关闭当前客户端 {}", server2clientSocket);
+                        server2clientSocket.close();
                     }
                     log.info("Server\t共监听{}个端口",listenCount);
                 } else if (eventIndex == MessageFlag.eventCloseConnect){
@@ -151,7 +156,19 @@ class ServerGetEventHandler implements Runnable{
                 e.printStackTrace();
             }
         }
-        log.info("Server\t客户端退出 {}",clientSocket);
+        try {
+            server2clientSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        log.info("Server\t客户端退出 {}, 将关闭各监听socket", server2clientSocket);
+        listenSocketList.forEach(t->{
+            try {
+                t.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }
 

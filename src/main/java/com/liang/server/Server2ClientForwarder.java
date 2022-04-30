@@ -1,7 +1,5 @@
 package com.liang.server;
 
-import com.liang.client.ClientMapUtil;
-import com.liang.client.NatClient;
 import com.liang.common.ByteUtil;
 import com.liang.common.MessageFlag;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +16,11 @@ import java.net.Socket;
  **/
 @Slf4j
 public class Server2ClientForwarder implements Runnable{
-    Socket socketWan;
-    public Server2ClientForwarder(Socket socketWan) {
+    private final Socket socketWan;
+    private final Socket server2clientSocket;
+    public Server2ClientForwarder(Socket socketWan, Socket server2clientSocket) {
         this.socketWan = socketWan;
+        this.server2clientSocket = server2clientSocket;
         log.info("Server\t{}开启服务端向客户端的端口消息转发", socketWan);
     }
 
@@ -28,7 +28,6 @@ public class Server2ClientForwarder implements Runnable{
     public void run() {
         byte[] bytes = new byte[1024];
         byte[] socketWanNames = socketWan.toString().getBytes();
-        Socket server2clientSocket = ServerMapUtil.serverPortMap.get(socketWan.getLocalPort());
         while (socketWan.isConnected() && !socketWan.isClosed()){
             try {
                 InputStream in = socketWan.getInputStream();
