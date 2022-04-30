@@ -54,13 +54,9 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
                     break;
                 }
             } catch (IOException e) {
-                log.warn("Server\t{}端口无法接收新的连接申请异常, serverSocket:{}", port, listenSocket);
+                log.warn("Server\t无法监听端口{}, {}", port, e.getMessage());
                 e.printStackTrace();
-                try {
-                    listenSocket.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                break;
             }
         }
         if (!listenSocket.isClosed()){
@@ -70,6 +66,6 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
                 e.printStackTrace();
             }
         }
-        log.info("Server\t客户端断开了连接{}, 云端端口[{}]停止监听并释放线程", server2clientSocket, port);
+        log.info("Server\t云端端口[{}]停止监听并释放线程", port);
     }
 }
