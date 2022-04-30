@@ -63,11 +63,13 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
                 }
             }
         }
-        try {
-            listenSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!listenSocket.isClosed()){
+            try {
+                listenSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        log.info("Server\t客户端断开了连接{}, 服务器端口[{}]停止监听", clientSocket, port);
+        log.info("Server\t客户端断开了连接{}, 云端端口[{}]停止监听并释放线程", server2clientSocket, port);
     }
 }
