@@ -50,30 +50,34 @@ public class AESUtil {
         return true;
     }
     // 加密
-    public static byte[] encrypt(byte[] src) throws IllegalBlockSizeException, BadPaddingException {
-        return encryptCipher.doFinal(src);
+    public static byte[] encrypt(byte[] src){
+        byte[] bytes = null;
+        try {
+            bytes =  encryptCipher.doFinal(src);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            e.printStackTrace();
+        }
+        return bytes;
     }
 
     // 解密
-    public static byte[] decrypt(byte[] src) throws IllegalBlockSizeException, BadPaddingException {
-        return decryptCipher.doFinal(src);
+    public static byte[] decrypt(byte[] src){
+        byte[] bytes = null;
+        try {
+            bytes =  decryptCipher.doFinal(src);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            e.printStackTrace();
+        }
+        return bytes;
     }
 
     public static void main(String[] args) {
         String srcString = "dasfasjkfhjashdfjhausdfhuksaddafahsjkdfhjashdfjkajdfhakjhfdd5454524asd521f5as4df35sa4f";
         byte[] src = srcString.getBytes();
         byte[] encrypted = new byte[0];
-        try {
-            encrypted = AESUtil.encrypt(src);
-        } catch (IllegalBlockSizeException | BadPaddingException e) {
-            e.printStackTrace();
-        }
+        encrypted = AESUtil.encrypt(src);
         byte[] decrypted = new byte[0];
-        try {
-            decrypted = AESUtil.decrypt(encrypted);
-        } catch (IllegalBlockSizeException | BadPaddingException e) {
-            e.printStackTrace();
-        }
+        decrypted = AESUtil.decrypt(encrypted);
         System.out.println(src.length+" "+encrypted.length+" "+decrypted.length);
         String s = new String(decrypted);
         System.out.println(s);
