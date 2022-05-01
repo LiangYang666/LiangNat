@@ -8,7 +8,6 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
@@ -20,7 +19,6 @@ import java.util.Map;
  **/
 @Slf4j
 public class NatServer {
-
     public static void main(String[] args) throws IOException {
         FileInputStream in = new FileInputStream("config_server.yaml");
         Yaml yaml = new Yaml();
