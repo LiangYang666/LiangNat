@@ -23,15 +23,34 @@ import java.util.List;
 class ServerGetEventHandler implements Runnable{
     private final Socket server2clientSocket;       // 该服务端处理线程使用的信息交互socket
     private final List<ServerSocket> listenSocketList;    // 该信息交互通道上所有云端端口的监听serverSocket
+    private boolean loginSuccess = false; //
+    private final String token;
 
-    public ServerGetEventHandler(Socket server2clientSocket) {
+    public ServerGetEventHandler(Socket server2clientSocket, String token) {
         this.server2clientSocket = server2clientSocket;
+        this.token = token;
         listenSocketList = new ArrayList<>();
         log.info("Server\t开始事件监听");
     }
 
     public int loginHandler(InputStream in) throws IOException {
         int read;
+        int tokenCount = in.read();
+        if (tokenCount <= 0) {
+            log.warn("Server\t客户端登录事件异常，密码长度未指定或非法");
+            return -1;
+        }
+        byte[] tokenBytes = new byte[tokenCount];
+        read = in.read(tokenBytes);
+        if (read != tokenCount) {
+            log.warn("Server\t客户端登录事件异常，密码获取失败或非法");
+            return -1;
+        }
+        if (! new String(tokenBytes).equals(token)){
+            log.warn("Server\t客户端登录事件异常，密码错误");
+            return -1;
+        }
+        loginSuccess = true;
         byte[] countBytes = new byte[4];
         read = in.read(countBytes);
         if (read == -1) {
@@ -133,24 +152,34 @@ class ServerGetEventHandler implements Runnable{
                 int eventIndex;
                 eventIndex = in.read();
                 if (eventIndex==-1) {
-                    log.info("Server\tsocket对应的输入流关闭: {} ", server2clientSocket);
+                    log.info("Server\tsocket对应的输入流关闭: {} ", server2clientSocket.getRemoteSocketAddress());
                     server2clientSocket.close();
                 }
                 log.trace("Server\t收到事件: " + MessageFlag.getComment(eventIndex));
-                if (eventIndex == MessageFlag.eventLogin) {
-                    log.info("Server\t客户端登录事件发生");
-                    int listenCount = loginHandler(in);
-                    if (listenCount<=0){
-                        log.info("Server\t无监听事件，关闭当前客户端 {}", server2clientSocket);
-                        server2clientSocket.close();
+                if (!loginSuccess){         // 未登录  需要先登录
+                    if (eventIndex == MessageFlag.eventLogin) {
+                        log.info("Server\t客户端登录事件发生");
+                        int listenCount = loginHandler(in);
+                        if (!loginSuccess) {
+                            log.warn("Server\t客户端登录失败，关闭当前客户端 {}", server2clientSocket.getRemoteSocketAddress());
+                            break;
+                        }
+                        if (listenCount<=0){
+                            log.info("Server\t客户端无监听事件，关闭当前客户端 {}", server2clientSocket.getRemoteSocketAddress());
+                            break;
+                        }
+                        log.info("Server\t共监听{}个端口",listenCount);
+                    } else {
+                        log.warn("Server\t客户端未登录，关闭当前客户端 {}", server2clientSocket.getRemoteSocketAddress());
                     }
-                    log.info("Server\t共监听{}个端口",listenCount);
-                } else if (eventIndex == MessageFlag.eventCloseConnect){
-                    closeConnect(in);
-                }  else if (eventIndex == MessageFlag.eventForward){
-                    forward(in);
                 } else {
-                    log.warn("Server\t非正常事件标志 [{}]", eventIndex);
+                    if (eventIndex == MessageFlag.eventCloseConnect){
+                        closeConnect(in);
+                    }  else if (eventIndex == MessageFlag.eventForward){
+                        forward(in);
+                    } else {
+                        log.warn("Server\t非正常事件标志 [{}]", eventIndex);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
