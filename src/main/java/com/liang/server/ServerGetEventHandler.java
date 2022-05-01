@@ -189,6 +189,7 @@ class ServerGetEventHandler implements Runnable{
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                break;
             }
         }
         try {
