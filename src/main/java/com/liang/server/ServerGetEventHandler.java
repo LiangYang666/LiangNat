@@ -1,5 +1,6 @@
 package com.liang.server;
 
+import com.liang.common.AESUtil;
 import com.liang.common.ByteUtil;
 import com.liang.common.MessageFlag;
 import lombok.extern.slf4j.Slf4j;
@@ -35,17 +36,19 @@ class ServerGetEventHandler implements Runnable{
 
     public int loginHandler(InputStream in) throws IOException {
         int read;
-        int tokenCount = in.read();
-        if (tokenCount <= 0) {
+        int tokenBytesCount = in.read();
+        if (tokenBytesCount <= 0) {
             log.warn("Server\t客户端登录事件异常，密码长度未指定或非法");
             return -1;
         }
-        byte[] tokenBytes = new byte[tokenCount];
+        tokenBytesCount = AESUtil.countPadding(tokenBytesCount);   // 是加密字段需要补全长度
+        byte[] tokenBytes = new byte[tokenBytesCount];
         read = in.read(tokenBytes);
-        if (read != tokenCount) {
+        if (read != tokenBytesCount) {
             log.warn("Server\t客户端登录事件异常，密码获取失败或非法");
             return -1;
         }
+        tokenBytes = AESUtil.decrypt(tokenBytes);   // 解密
         if (! new String(tokenBytes).equals(token)){
             log.warn("Server\t客户端登录事件异常，密码错误");
             return -1;
@@ -54,16 +57,19 @@ class ServerGetEventHandler implements Runnable{
         byte[] countBytes = new byte[4];
         read = in.read(countBytes);
         if (read == -1) {
-            log.warn("Server\t客户端登录事件异常");
+            log.warn("Server\t客户端登录事件异常，端口数不合法");
             return -1;
         }
         int count = ByteUtil.byteArrayToInt(countBytes);
-        byte[] portsBytes = new byte[count * 4];
+        int bytesCount = count*4;
+        bytesCount = AESUtil.countPadding(bytesCount);
+        byte[] portsBytes = new byte[bytesCount];    // 每个端口号字节码将加密 4个字节将会补全为16个字节
         read = in.read(portsBytes);
-        if (read != count * 4) {
-            log.warn("Server\t客户端登录事件异常,数据长度不足");
+        if (read != bytesCount) {
+            log.warn("Server\t客户端登录事件异常，端口数据长度不足");
             return -1;
         }
+        portsBytes = AESUtil.decrypt(portsBytes);
         int listenCount = 0;
         for (int i = 0; i < count; i++) {
             int port = ByteUtil.byteArrayToInt(portsBytes, i * 4);

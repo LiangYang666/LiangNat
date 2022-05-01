@@ -1,5 +1,6 @@
 package com.liang.client;
 
+import com.liang.common.AESUtil;
 import com.liang.common.ByteUtil;
 import com.liang.common.MessageFlag;
 import com.liang.server.NatServer;
@@ -62,11 +63,16 @@ public class NatClient {
                 OutputStream out = client2serverSocket.getOutputStream();
                 out.write(MessageFlag.eventLogin);   // 写事件
                 out.write(tokenBytes.length);   // 写密码长度
-                out.write(tokenBytes);      // 写密码
+                out.write(AESUtil.encrypt(tokenBytes));      // 写密码(并加密)
                 out.write(ByteUtil.intToByteArray(clientConfig.portMap.size()));    // 写端口数量
+                byte[] bytes = new byte[clientConfig.portMap.size()*4];
                 for (int i = 0; i < clientConfig.portMap.size(); i++) {     // 写云端口
-                    out.write(ByteUtil.intToByteArray(clientConfig.portMap.get(i).remotePort));
+                    byte[] temp = ByteUtil.intToByteArray(clientConfig.portMap.get(i).remotePort);
+                    for (int j = 0; j < 4; j++) {
+                        bytes[i*4+j] = temp[j];
+                    }
                 }
+                out.write(AESUtil.encrypt(bytes));
                 Thread workThread = new Thread(new ClientGetEventHandler(client2serverSocket));
                 workThread.start(); // 开启事件监听
                 workThread.join();
