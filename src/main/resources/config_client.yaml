@@ -1,0 +1,23 @@
+common:
+  server_addr: 127.0.0.1
+  server_port: 10101
+  token: 123456
+
+nat:
+  vnc-21:
+    type: tcp
+    local_ip: 192.168.0.202
+    local_port: 5901
+    remote_port: 45901
+
+  ssh-2:
+    type: tcp
+    local_ip: 192.168.0.202
+    local_port: 22
+    remote_port: 40022
+
+  vnc-25:
+    type: tcp
+    local_ip: 192.168.0.202
+    local_port: 5905
+    remote_port: 45905

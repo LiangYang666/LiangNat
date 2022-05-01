@@ -10,11 +10,13 @@ import java.util.List;
 public class ClientConfig {
     public String serverAddress;
     public int serverPort;
+    private final String token;
     public List<ClientPortMapConfig> portMap;
 
-    public ClientConfig(String serverAddress, int serverPort, List<ClientPortMapConfig> portMap) {
+    public ClientConfig(String serverAddress, int serverPort, String token, List<ClientPortMapConfig> portMap) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
+        this.token = token;
         this.portMap = portMap;
     }
 
@@ -32,6 +34,10 @@ public class ClientConfig {
 
     public void setServerPort(int serverPort) {
         this.serverPort = serverPort;
+    }
+
+    public String getToken() {
+        return token;
     }
 
     public List<ClientPortMapConfig> getPortMap() {

@@ -1,13 +1,17 @@
 package com.liang.client;
 
 import com.liang.common.ByteUtil;
+import com.liang.server.NatServer;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
+import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: TODO
@@ -18,22 +22,41 @@ import java.util.ArrayList;
 public class NatClient {
     static Socket client2serverSocket;
 
-    public static void main(String[] args) {
-        String serverAddress = "127.0.0.1";
-        int serverPort = 10101;
+    public static ClientConfig clientInitConfig(){
+        InputStream in = NatServer.class.getResourceAsStream("/config_client.yaml");
+        Yaml yaml = new Yaml();
+        Map config = yaml.loadAs(in, Map.class);
+        System.out.println(config);
+        Map common = (Map) config.get("common");
+        String serverAddress = (String) common.get("server_addr");
+        Integer serverPort = (Integer) common.get("server_port");
+        String token = common.get("token").toString();
+        Map<String, Map<String, Object>> natMap = (Map<String, Map<String, Object>>) config.get("nat");
         ArrayList<ClientPortMapConfig> portWantMap = new ArrayList<>();
-        portWantMap.add(new ClientPortMapConfig("vnc5905", "192.168.0.202", 5905, 45905));
-        portWantMap.add(new ClientPortMapConfig("vnc5901", "192.168.0.202", 5901, 45901));
-        portWantMap.add(new ClientPortMapConfig("ssh22", "192.168.0.202", 22, 40022));
-        ClientConfig clientConfig = new ClientConfig(serverAddress, serverPort, portWantMap);
+        for (String name : natMap.keySet()) {
+            Map<String, Object> natEntry = natMap.get(name);
+            //
+            String localIp = (String) natEntry.get("local_ip");
+            Integer localPort = (Integer) natEntry.get("local_port");
+            Integer remotePort = (Integer) natEntry.get("remote_port");
+            portWantMap.add(new ClientPortMapConfig(name, localIp, localPort, remotePort));
+        }
+        ClientConfig clientConfig = new ClientConfig(serverAddress, serverPort, token, portWantMap);
+        System.out.println(portWantMap);
+        return clientConfig;
+    }
+
+    public static void main(String[] args) {
+        ClientConfig clientConfig = clientInitConfig();
+        List<ClientPortMapConfig> portWantMap = clientConfig.getPortMap();
         for (int i = 0; i < portWantMap.size(); i++) {
             ClientMapUtil.remotePortMap.put(portWantMap.get(i).getRemotePort(), portWantMap.get(i));
         }
         while(true){
             try {
-                client2serverSocket = new Socket(serverAddress, serverPort);
+                client2serverSocket = new Socket(clientConfig.serverAddress, clientConfig.serverPort);
                 log.info("Client\t成功登录到远程服务器 socket-> "+client2serverSocket);
-                log.info("Client\t服务端:"+serverAddress+" 端口:"+serverPort);
+                log.info("Client\t服务端:"+clientConfig.serverAddress+" 端口:"+clientConfig.serverPort);
                 log.info("Client\t客户端:"+client2serverSocket.getLocalAddress()+" 端口:"+client2serverSocket.getLocalPort());
                 OutputStream out = client2serverSocket.getOutputStream();
                 out.write(ByteUtil.intToByte(1));
@@ -59,4 +82,5 @@ public class NatClient {
             }
         }
     }
+
 }

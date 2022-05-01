@@ -1,0 +1,3 @@
+common:
+  bind_port: 10101
+  token: 1234

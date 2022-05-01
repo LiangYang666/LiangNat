@@ -3,12 +3,14 @@ package com.liang.server;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.yaml.snakeyaml.Yaml;
+
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 
 /**
  * @Description: TODO
@@ -19,10 +21,16 @@ import java.net.Socket;
 public class NatServer {
 
     public static void main(String[] args) throws IOException {
+        InputStream in = NatServer.class.getResourceAsStream("/config_server.yaml");
+        Yaml yaml = new Yaml();
+        Map map = yaml.loadAs(in, Map.class);
+        Map common = (Map) map.get("common");
+        Integer bindPort = (Integer) common.get("bind_port");
+        Object tokenRaw = common.get("token");
+        String token = tokenRaw == null ? "123456 " : tokenRaw.toString();
 
-        int port = 10101;
-        ServerSocket serverSocket = new ServerSocket(port);
-        log.info("Server\t服务启动，开始监听端口 "+ port);
+        ServerSocket serverSocket = new ServerSocket(bindPort);
+        log.info("Server\t服务启动，开始监听端口 "+ bindPort);
 
         while (true){
             Socket wanSocket = serverSocket.accept();
