@@ -131,8 +131,14 @@ public class ClientGetEventHandler implements Runnable{
 
             } catch (IOException e) {
                 e.printStackTrace();
+                break;
             }
         }
-        log.info("Client\t服务器连接中断，客户端退出");
+        try {
+            client2serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        log.info("Client\t与服务器的连接中断，退出");
     }
 }

@@ -9,7 +9,9 @@ public class MessageFlag {
     // 消息体定义规范 第一个字节为标志位 标志位有以下几种
     public static final int eventLogin = 1;
     // 是客户端登录事件
-    // 第2、3、4、5四个个字节表示需要监听端口的总数portCount
+    // 第2个字节为密码长度
+    // 第3个到后面为密码字节
+    // 密码后的四个个字节表示需要监听端口的总数portCount
     // 之后的字节共有4*portCount 每个字节表示一个想要监听的端口
 
     public static final int eventNewConnect = 2;
