@@ -26,15 +26,15 @@ public class NatServer {
         Map common = (Map) map.get("common");
         Integer bindPort = (Integer) common.get("bind_port");
         Object tokenRaw = common.get("token");
-        String token = tokenRaw == null ? "123456 " : tokenRaw.toString();
+        String token = tokenRaw == null ? "1234 " : tokenRaw.toString();
 
         ServerSocket serverSocket = new ServerSocket(bindPort);
         log.info("Server\t服务启动，开始监听端口 "+ bindPort);
 
         while (true){
             Socket wanSocket = serverSocket.accept();
-            log.info("Server\t接收到登录请求: "+ wanSocket);
-            new Thread(new ServerGetEventHandler(wanSocket)).start();   // 开启事件监听
+            log.info("Server\t服务端口接收到连接请求 来自{}", wanSocket.getRemoteSocketAddress());
+            new Thread(new ServerGetEventHandler(wanSocket, token)).start();   // 开启事件监听
         }
     }
 }
