@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
 
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
@@ -21,7 +22,7 @@ import java.util.Map;
 public class NatServer {
 
     public static void main(String[] args) throws IOException {
-        InputStream in = NatServer.class.getResourceAsStream("/config_server.yaml");
+        FileInputStream in = new FileInputStream("config_server.yaml");
         Yaml yaml = new Yaml();
         Map map = yaml.loadAs(in, Map.class);
         Map common = (Map) map.get("common");

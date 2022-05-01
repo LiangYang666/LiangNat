@@ -3,7 +3,6 @@ package com.liang.client;
 import com.liang.common.ByteUtil;
 import com.liang.server.NatServer;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -22,8 +21,8 @@ import java.util.Map;
 public class NatClient {
     static Socket client2serverSocket;
 
-    public static ClientConfig clientInitConfig(){
-        InputStream in = NatServer.class.getResourceAsStream("/config_client.yaml");
+    public static ClientConfig clientInitConfig() throws FileNotFoundException {
+        FileInputStream in = new FileInputStream("config_client.yaml");
         Yaml yaml = new Yaml();
         Map config = yaml.loadAs(in, Map.class);
         System.out.println(config);
@@ -46,7 +45,7 @@ public class NatClient {
         return clientConfig;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         ClientConfig clientConfig = clientInitConfig();
         List<ClientPortMapConfig> portWantMap = clientConfig.getPortMap();
         for (int i = 0; i < portWantMap.size(); i++) {
