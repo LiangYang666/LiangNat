@@ -58,7 +58,7 @@ public class Server2ClientForwarder implements Runnable{
                     out.write(encryptedData);
 //                    out.flush();
                 }
-                log.trace("Server\t云端端口转发消息成功，消息体长度{}，转发携带{}，转发至{}",read, socketWan, server2clientSocket);
+                log.trace("Server\t云端端口转发消息成功，消息体长度加密前{}/后{}，转发携带{}，转发至{}",read, encryptedData.length, socketWan, server2clientSocket);
             } catch (IOException e) {
                 e.printStackTrace();
                 log.warn("Server\t转发消息异常，关闭连接");
