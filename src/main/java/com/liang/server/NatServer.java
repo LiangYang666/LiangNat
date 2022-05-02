@@ -2,7 +2,11 @@ package com.liang.server;
 
 
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 
@@ -10,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -20,6 +25,16 @@ import java.util.Map;
 @Slf4j
 public class NatServer {
     public static void main(String[] args) throws IOException {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        Logger logger = loggerContext.getLogger("root");
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("trace")){
+                logger.setLevel(Level.TRACE);
+            } else if(args[i].equals("info")){
+                logger.setLevel(Level.INFO);
+            }
+        }
+
         FileInputStream in = new FileInputStream("config_server.yaml");
         Yaml yaml = new Yaml();
         Map map = yaml.loadAs(in, Map.class);

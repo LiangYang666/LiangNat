@@ -1,10 +1,14 @@
 package com.liang.client;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
 import com.liang.common.AESUtil;
 import com.liang.common.ByteUtil;
 import com.liang.common.MessageFlag;
 import com.liang.server.NatServer;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
@@ -48,6 +52,15 @@ public class NatClient {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        Logger logger = loggerContext.getLogger("root");
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("trace")){
+                logger.setLevel(Level.TRACE);
+            } else if(args[i].equals("info")){
+                logger.setLevel(Level.INFO);
+            }
+        }
         ClientConfig clientConfig = clientInitConfig();
         List<ClientPortMapConfig> portWantMap = clientConfig.getPortMap();
         for (int i = 0; i < portWantMap.size(); i++) {
