@@ -14,7 +14,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -49,7 +48,7 @@ public class NatServer {
         while (true){
             Socket wanSocket = serverSocket.accept();
             log.info("Server\t服务端口接收到连接请求 来自{}", wanSocket.getRemoteSocketAddress());
-            new Thread(new ServerGetEventHandler(wanSocket, token)).start();   // 开启事件监听
+            new Thread(new ServerGetEventHandler(wanSocket, token), "ServerGetEvent"+wanSocket.getRemoteSocketAddress()).start();   // 开启事件监听
         }
     }
 }

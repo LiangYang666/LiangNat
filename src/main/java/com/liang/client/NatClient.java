@@ -6,7 +6,6 @@ import ch.qos.logback.classic.LoggerContext;
 import com.liang.common.AESUtil;
 import com.liang.common.ByteUtil;
 import com.liang.common.MessageFlag;
-import com.liang.server.NatServer;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -89,7 +88,7 @@ public class NatClient {
                 byte[] encryptedPortsBytes = aesUtil.encrypt(portsBytes);
                 out.write(ByteUtil.intToByteArray(encryptedPortsBytes.length));    // 写端口数组长度
                 out.write(encryptedPortsBytes);     // 写端口
-                Thread workThread = new Thread(new ClientGetEventHandler(client2serverSocket));
+                Thread workThread = new Thread(new ClientGetEventHandler(client2serverSocket), "ClientGetEvent"+client2serverSocket.getRemoteSocketAddress());
                 workThread.start(); // 开启事件监听
                 workThread.join();  // 等待线程结束
             }catch (ConnectException e) {
