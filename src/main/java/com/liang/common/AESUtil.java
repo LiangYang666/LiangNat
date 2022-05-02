@@ -51,24 +51,29 @@ public class AESUtil {
     }
     // 加密
     public static byte[] encrypt(byte[] src){
-        byte[] bytes = null;
-        try {
-            bytes =  encryptCipher.doFinal(src);
-        } catch (IllegalBlockSizeException | BadPaddingException e) {
-            e.printStackTrace();
+        synchronized (AESUtil.class){
+            byte[] bytes = null;
+            try {
+                bytes =  encryptCipher.doFinal(src);
+            } catch (IllegalBlockSizeException | BadPaddingException e) {
+                e.printStackTrace();
+            }
+            return bytes;
         }
-        return bytes;
     }
 
     // 解密
     public static byte[] decrypt(byte[] src){
-        byte[] bytes = null;
-        try {
-            bytes =  decryptCipher.doFinal(src);
-        } catch (IllegalBlockSizeException | BadPaddingException e) {
-            e.printStackTrace();
+        synchronized (AESUtil.class){
+            byte[] bytes = null;
+            try {
+                bytes =  decryptCipher.doFinal(src);
+
+            } catch (IllegalBlockSizeException | BadPaddingException e) {
+                e.printStackTrace();
+            }
+            return bytes;
         }
-        return bytes;
     }
 
     public static int countPadding(int src){    // 补全不足16整数倍的数 因为128位加密需要位数是128整数倍的字节数组，一个字节8位 8*16=128
