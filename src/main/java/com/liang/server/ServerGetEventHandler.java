@@ -138,6 +138,10 @@ class ServerGetEventHandler implements Runnable{
         }
         byte[] nameBytes = aesUtil.decrypt(encryptedNameBytes);
         Socket socketWan = ServerMapUtil.socketWanMap.get(new String(nameBytes));
+        if (socketWan==null) {
+            log.warn("Server\t关闭连接事件异常，未找到对应的socketWan");
+            return;
+        }
         ServerMapUtil.socketWanMap.remove(new String(nameBytes));
         socketWan.close();
         log.info("Server\t处理关闭连接事件完成，成功关闭并移除socketWan{}", socketWan);
