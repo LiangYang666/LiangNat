@@ -72,7 +72,7 @@ public class AESUtil {
     }
 
     public static int countPadding(int src){    // 补全不足16整数倍的数 因为128位加密需要位数是128整数倍的字节数组，一个字节8位 8*16=128
-        return (src + 15) / 16 * 16;
+        return (src + 16) / 16 * 16;
     }
 
     public static void main(String[] args) {
