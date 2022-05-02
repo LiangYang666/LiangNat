@@ -11,26 +11,28 @@ import java.security.NoSuchAlgorithmException;
  * @Date: 2022/5/1 下午9:18
  **/
 public class AESUtil {
-    private static String aesKey = "0123456789abcdef";
+    private String aesKey;
     private static final String ALGORITHMS = "AES/ECB/PKCS5Padding";
-    private static Cipher encryptCipher;
-    private static Cipher decryptCipher;
-    public AESUtil instance;
-    static {
+    private Cipher encryptCipher;
+    private Cipher decryptCipher;
+
+
+    public AESUtil() {
+        this("0123456789abcdef");
+    }
+
+    public AESUtil(String aesKey) {
+        this.aesKey = aesKey;
         init();
     }
 
-    public static boolean setAESKey(String aesKey) {
-        AESUtil.aesKey = aesKey;
-        return init();
-    }
-    public static boolean init() {
+    public void init() {
         KeyGenerator keyGenerator = null;
         try {
             keyGenerator = KeyGenerator.getInstance("AES");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
-            return false;
+            return;
         }
         keyGenerator.init(128);     // 设置密钥长度为128
         try {
@@ -38,45 +40,57 @@ public class AESUtil {
             encryptCipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(aesKey.getBytes(), "AES"));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
             e.printStackTrace();
-            return false;
+            return;
         }
         try {
             decryptCipher = Cipher.getInstance(ALGORITHMS);   // 创建密码器
             decryptCipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(aesKey.getBytes(), "AES"));
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException e) {
             e.printStackTrace();
-            return false;
         }
-        return true;
     }
     // 加密
-    public static byte[] encrypt(byte[] src){
-        synchronized (AESUtil.class){
-            byte[] bytes = null;
-            try {
-                bytes =  encryptCipher.doFinal(src);
-            } catch (IllegalBlockSizeException | BadPaddingException e) {
-                e.printStackTrace();
-            }
-            return bytes;
+    public byte[] encrypt(byte[] src){
+        byte[] bytes = null;
+        try {
+            bytes =  encryptCipher.doFinal(src);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            e.printStackTrace();
         }
+        return bytes;
+    }
+    public byte[] encrypt(byte[] src, int pos, int length){
+        byte[] bytes = null;
+        try {
+            bytes =  encryptCipher.doFinal(src, pos, length);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            e.printStackTrace();
+        }
+        return bytes;
     }
 
     // 解密
-    public static byte[] decrypt(byte[] src){
-        synchronized (AESUtil.class){
-            byte[] bytes = null;
-            try {
-                bytes =  decryptCipher.doFinal(src);
-
-            } catch (IllegalBlockSizeException | BadPaddingException e) {
-                e.printStackTrace();
-            }
-            return bytes;
+    public byte[] decrypt(byte[] src){
+        byte[] bytes = null;
+        try {
+            bytes =  decryptCipher.doFinal(src);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            e.printStackTrace();
         }
+        return bytes;
     }
 
-    public static int countPadding(int src){    // 补全不足16整数倍的数 因为128位加密需要位数是128整数倍的字节数组，一个字节8位 8*16=128
+    public byte[] decrypt(byte[] src, int pos, int length){
+        byte[] bytes = null;
+        try {
+            bytes =  decryptCipher.doFinal(src, pos, length);
+        } catch (IllegalBlockSizeException | BadPaddingException e) {
+            e.printStackTrace();
+        }
+        return bytes;
+    }
+
+    public int countPadding(int src){    // 补全不足16整数倍的数 因为128位加密需要位数是128整数倍的字节数组，一个字节8位 8*16=128
         return (src + 16) / 16 * 16;
     }
 
@@ -84,9 +98,10 @@ public class AESUtil {
         String srcString = "dasfasjkfhjashdfjhausdfhuksaddafahsjkdfhjashdfjkajdfhakjhfdd5454524asd521f5as4df35sa4f";
         byte[] src = srcString.getBytes();
         byte[] encrypted = new byte[0];
-        encrypted = AESUtil.encrypt(src);
+        AESUtil aesUtil = new AESUtil();
+        encrypted = aesUtil.encrypt(src, 2, 16);
         byte[] decrypted = new byte[0];
-        decrypted = AESUtil.decrypt(encrypted);
+        decrypted = aesUtil.decrypt(encrypted);
         System.out.println(src.length+" "+encrypted.length+" "+decrypted.length);
         String s = new String(decrypted);
         System.out.println(s);
