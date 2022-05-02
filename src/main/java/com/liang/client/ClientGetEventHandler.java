@@ -2,6 +2,7 @@ package com.liang.client;
 
 import com.liang.common.AESUtil;
 import com.liang.common.ByteUtil;
+import com.liang.common.IOReadUtil;
 import com.liang.common.MessageFlag;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,12 +31,11 @@ public class ClientGetEventHandler implements Runnable{
         log.trace("Client\t进入新连接处理");
         int read;
         byte[] portEncryptedBytes = new byte[16];
-        read = in.read(portEncryptedBytes);
-        if (read != 16) {
-            log.warn("Server\t新连接事件异常");
+        if (!IOReadUtil.readFixedLength(in, portEncryptedBytes)) {
+            log.warn("Server\t新连接事件异常, 端口号读取异常");
             return;
         }
-        byte[] remotePortBytes = aesUtil.decrypt(portEncryptedBytes);   // 解密出云端端口，长度为4个字节
+        byte[] remotePortBytes = aesUtil.decrypt(portEncryptedBytes);   // 解密出云端端口号，长度为4个字节
 
         int encryptedNameLength = in.read();
         if (encryptedNameLength <= 0) {
@@ -43,8 +43,7 @@ public class ClientGetEventHandler implements Runnable{
             return;
         }
         byte[] encryptedNameBytes = new byte[encryptedNameLength];
-        read = in.read(encryptedNameBytes);
-        if (encryptedNameLength!=read){
+        if (!IOReadUtil.readFixedLength(in, encryptedNameBytes)){
             log.warn("Server\t新连接事件异常，远程socket信息数据长度不足");
             return;
         }
@@ -69,26 +68,21 @@ public class ClientGetEventHandler implements Runnable{
             return;
         }
         byte[] encryptedNameBytes = new byte[encryptedNameBytesLength];
-        int read = in.read(encryptedNameBytes);
-        if (read != encryptedNameBytesLength) {
+        if (!IOReadUtil.readFixedLength(in, encryptedNameBytes)) {
             log.warn("Client\t转发事件异常，socket名称获取失败");
             return;
         }
         byte[] nameBytes = aesUtil.decrypt(encryptedNameBytes);
 
         byte[] encryptedDataLengthBytes = new byte[4];
-        read = in.read(encryptedDataLengthBytes);
-        if (read != 4) {
-            log.warn("Client\t转发事件异常，消息体长度未指定");
+        if (!IOReadUtil.readFixedLength(in, encryptedDataLengthBytes)) {
+            log.warn("Client\t转发事件异常，消息体长度获取异常");
             return;
         }
 
-        int encryptedDataLength = ByteUtil.byteArrayToInt(encryptedDataLengthBytes);
-        byte[] encryptedData = new byte[encryptedDataLength];
-        read = in.read(encryptedData);
-        log.debug("length {}", read);
-        if (read != encryptedDataLength) {
-            log.warn("Client\t转发事件异常,消息长度不一致,消息头指定长度{}，真实读取长度{}",encryptedDataLength, read);
+        byte[] encryptedData = new byte[ByteUtil.byteArrayToInt(encryptedDataLengthBytes)];
+        if (!IOReadUtil.readFixedLength(in, encryptedData)) {
+            log.warn("Client\t转发事件异常,消息体获取异常，需要{}", encryptedData.length);
             return;
         }
         byte[] data = aesUtil.decrypt(encryptedData);
@@ -101,7 +95,7 @@ public class ClientGetEventHandler implements Runnable{
         OutputStream out = socketLan.getOutputStream();
         out.write(data);
 //        out.flush();
-        log.trace("Client\t本次转发事件完成，转发长度{},转发携带{}，转发至{}", read, new String(nameBytes), socketLan);
+        log.trace("Client\t本次转发事件完成，消息体长度解密前{}/后{},转发携带{}，转发至{}", encryptedData.length, data.length, new String(nameBytes), socketLan);
     }
     public void closeConnect(InputStream in) throws IOException {
         log.trace("Client\t处理关闭连接事件");
@@ -111,8 +105,7 @@ public class ClientGetEventHandler implements Runnable{
             return;
         }
         byte[] encryptedNameBytes = new byte[nameCount];
-        int read = in.read(encryptedNameBytes);
-        if (read != nameCount) {
+        if (!IOReadUtil.readFixedLength(in, encryptedNameBytes)) {
             log.warn("Client\t关闭连接事件异常，socket名称获取失败");
             return;
         }

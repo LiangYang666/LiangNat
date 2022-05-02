@@ -2,6 +2,7 @@ package com.liang.server;
 
 import com.liang.common.AESUtil;
 import com.liang.common.ByteUtil;
+import com.liang.common.IOReadUtil;
 import com.liang.common.MessageFlag;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,15 +38,13 @@ class ServerGetEventHandler implements Runnable{
     }
 
     public int loginHandler(InputStream in) throws IOException {
-        int read;
         int tokenEncryptedBytesLength = in.read();
         if (tokenEncryptedBytesLength <= 0) {
             log.warn("Server\t客户端登录事件异常，密码长度未指定或非法");
             return -1;
         }
         byte[] tokenEncryptedBytes = new byte[tokenEncryptedBytesLength];
-        read = in.read(tokenEncryptedBytes);
-        if (read != tokenEncryptedBytesLength) {
+        if (!IOReadUtil.readFixedLength(in, tokenEncryptedBytes)) {
             log.warn("Server\t客户端登录事件异常，密码获取失败或非法");
             return -1;
         }
@@ -56,17 +55,13 @@ class ServerGetEventHandler implements Runnable{
         }
         loginSuccess = true;
         byte[] portBytesLengthBytes = new byte[4];
-        read = in.read(portBytesLengthBytes);
-        if (read != 4) {
+        if (!IOReadUtil.readFixedLength(in, portBytesLengthBytes)) {
             log.warn("Server\t客户端登录事件异常，端口数不合法");
             return -1;
         }
-
-        int bytesLength = ByteUtil.byteArrayToInt(portBytesLengthBytes);
-        byte[] portsEncryptedBytes = new byte[bytesLength];
-        read = in.read(portsEncryptedBytes);     // 读取需要监听的所有端口信息
-        if (read != bytesLength) {
-            log.warn("Server\t客户端登录事件异常，端口数据长度不足，需要{}，仅读取到{}", bytesLength, read);
+        byte[] portsEncryptedBytes = new byte[ByteUtil.byteArrayToInt(portBytesLengthBytes)];
+        if (!IOReadUtil.readFixedLength(in, portsEncryptedBytes)) {// 读取需要监听的所有端口信息
+            log.warn("Server\t客户端登录事件异常，端口数据长度不足，需要{}", portsEncryptedBytes.length);
             return -1;
         }
         byte[] portsBytes = aesUtil.decrypt(portsEncryptedBytes);
@@ -75,9 +70,9 @@ class ServerGetEventHandler implements Runnable{
             int port = ByteUtil.byteArrayToInt(portsBytes, i * 4);
             log.info("Server\t注册并监听映射端口: " + port);
             boolean listenSuccessFlag = false;
-            ServerSocket serverSocket=null;
+            ServerSocket listenSocket=null;
             try {
-                serverSocket = new ServerSocket(port);
+                listenSocket = new ServerSocket(port);
                 listenSuccessFlag = true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -85,9 +80,9 @@ class ServerGetEventHandler implements Runnable{
             }
             if (listenSuccessFlag) {
                 log.info("Server\t监听端口成功: {}" ,port);
-                Thread thread = new Thread(new ServerListenRemotePortAcceptHandler(serverSocket, server2clientSocket), "Thread-listen["+port+"]");
+                Thread thread = new Thread(new ServerListenRemotePortAcceptHandler(listenSocket, server2clientSocket), "Thread-listen["+port+"]");
                 thread.start();
-                listenSocketList.add(serverSocket);
+                listenSocketList.add(listenSocket);
                 listenCount++;
             }
         }
@@ -102,23 +97,19 @@ class ServerGetEventHandler implements Runnable{
             return;
         }
         byte[] nameEncryptedBytes = new byte[encryptedNameLength];
-        int read = in.read(nameEncryptedBytes);
-        if (read != encryptedNameLength) {
+        if(!IOReadUtil.readFixedLength(in, nameEncryptedBytes)){
             log.warn("Server\t转发事件异常，socket名称获取失败");
             return;
         }
         byte[] nameBytes = aesUtil.decrypt(nameEncryptedBytes);
         byte[] dataBytesLengthBytes = new byte[4];
-        read = in.read(dataBytesLengthBytes);
-        if (read != 4) {
+        if (!IOReadUtil.readFixedLength(in, dataBytesLengthBytes)) {
             log.warn("Server\t转发事件异常，消息体长度未指定");
             return;
         }
-        int encryptedDataLength = ByteUtil.byteArrayToInt(dataBytesLengthBytes);
-        byte[] encryptedData = new byte[encryptedDataLength];
-        read = in.read(encryptedData);
-        if (read != encryptedDataLength) {
-            log.warn("Server\t转发事件异常,消息长度不一致,消息头指定长度{}，实际读取长度{}",encryptedDataLength, read);
+        byte[] encryptedData = new byte[ByteUtil.byteArrayToInt(dataBytesLengthBytes)];
+        if (!IOReadUtil.readFixedLength(in, encryptedData)) {
+            log.warn("Server\t转发事件异常,消息体读取失败，需要{}个",encryptedData.length);
             return;
         }
         Socket socketWan = ServerMapUtil.socketWanMap.get(new String(nameBytes));
@@ -129,8 +120,8 @@ class ServerGetEventHandler implements Runnable{
         byte[] data = aesUtil.decrypt(encryptedData);
         OutputStream out = socketWan.getOutputStream();
         out.write(data);
-        out.flush();
-        log.trace("Server\t本次转发事件完成，解密后消息体长度{},转发携带{},转发至{}", data.length, new String(nameBytes),socketWan);
+//        out.flush();
+        log.trace("Server\t本次转发事件完成，消息体长度解密前{}/后{},转发携带{},转发至{}", encryptedData.length, data.length, new String(nameBytes),socketWan);
     }
 
     public void closeConnect(InputStream in) throws IOException {
@@ -141,8 +132,7 @@ class ServerGetEventHandler implements Runnable{
             return;
         }
         byte[] encryptedNameBytes = new byte[encryptedNameLength];
-        int read = in.read(encryptedNameBytes);
-        if (read != encryptedNameLength) {
+        if (!IOReadUtil.readFixedLength(in, encryptedNameBytes)) {
             log.warn("Server\t关闭连接事件异常，socket名称获取失败");
             return;
         }
