@@ -1,5 +1,6 @@
 package com.liang.server;
 
+import com.liang.common.AESUtil;
 import com.liang.common.ByteUtil;
 import com.liang.common.MessageFlag;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +20,14 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
     private final ServerSocket listenSocket;
     private final Socket server2clientSocket;
     private final int port;
+    private final AESUtil aesUtil;
+
     public ServerListenRemotePortAcceptHandler(ServerSocket listenSocket, Socket server2clientSocket) {
         this.listenSocket = listenSocket;
         port = listenSocket.getLocalPort();
         this.server2clientSocket = server2clientSocket;
         log.info("Server\t开启线程监听云端端口 [{}],与客户端进行信息交互的Socket为{}", port, server2clientSocket);
+        aesUtil = new AESUtil();
     }
 
     @Override
@@ -39,12 +43,15 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
                 ServerMapUtil.socketWanMap.put(socketWanStr, socketWan);
                 if (server2clientSocket.isConnected() && !server2clientSocket.isClosed()){
                     OutputStream out = server2clientSocket.getOutputStream();
-                    byte[] bytes = socketWanStr.getBytes();
+                    byte[] nameBytes = socketWanStr.getBytes();
+                    byte[] encryptedNameBytes = aesUtil.encrypt(nameBytes);
+                    byte[] portBytes = ByteUtil.intToByteArray(port);
+                    byte[] encryptedPortBytes = aesUtil.encrypt(portBytes);
                     synchronized (out){
-                        out.write(ByteUtil.intToByte(MessageFlag.eventNewConnect));
-                        out.write(ByteUtil.intToByteArray(port));
-                        out.write(ByteUtil.intToByte(bytes.length));
-                        out.write(bytes);
+                        out.write(MessageFlag.eventNewConnect);
+                        out.write(encryptedPortBytes);
+                        out.write(ByteUtil.intToByte(encryptedNameBytes.length));
+                        out.write(encryptedNameBytes);
 //                        out.flush();
                     }
                     log.trace("Server\t新连接请求发送完成");

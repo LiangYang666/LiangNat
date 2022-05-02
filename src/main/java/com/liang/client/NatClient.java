@@ -54,6 +54,7 @@ public class NatClient {
             ClientMapUtil.remotePortMap.put(portWantMap.get(i).getRemotePort(), portWantMap.get(i));
         }
         byte[] tokenBytes = clientConfig.getToken().getBytes();
+        AESUtil aesUtil = new AESUtil();
         while(true){
             try {
                 client2serverSocket = new Socket(clientConfig.serverAddress, clientConfig.serverPort);
@@ -62,20 +63,22 @@ public class NatClient {
                 log.info("Client\t客户端:"+client2serverSocket.getLocalAddress()+" 端口:"+client2serverSocket.getLocalPort());
                 OutputStream out = client2serverSocket.getOutputStream();
                 out.write(MessageFlag.eventLogin);   // 写事件
-                out.write(tokenBytes.length);   // 写密码长度
-                out.write(AESUtil.encrypt(tokenBytes));      // 写密码(并加密)
-                out.write(ByteUtil.intToByteArray(clientConfig.portMap.size()));    // 写端口数量
-                byte[] bytes = new byte[clientConfig.portMap.size()*4];
+                byte[] encryptedToken = aesUtil.encrypt(tokenBytes);
+                out.write(encryptedToken.length);   // 写密码长度
+                out.write(encryptedToken);      // 写密码(并加密)
+                byte[] portsBytes = new byte[clientConfig.portMap.size()*4];
                 for (int i = 0; i < clientConfig.portMap.size(); i++) {     // 写云端口
                     byte[] temp = ByteUtil.intToByteArray(clientConfig.portMap.get(i).remotePort);
                     for (int j = 0; j < 4; j++) {
-                        bytes[i*4+j] = temp[j];
+                        portsBytes[i*4+j] = temp[j];
                     }
                 }
-                out.write(AESUtil.encrypt(bytes));
+                byte[] encryptedPortsBytes = aesUtil.encrypt(portsBytes);
+                out.write(ByteUtil.intToByteArray(encryptedPortsBytes.length));    // 写端口数组长度
+                out.write(encryptedPortsBytes);     // 写端口
                 Thread workThread = new Thread(new ClientGetEventHandler(client2serverSocket));
                 workThread.start(); // 开启事件监听
-                workThread.join();
+                workThread.join();  // 等待线程结束
             }catch (ConnectException e) {
                 log.warn("目标"+e.getMessage());
                 e.printStackTrace();
