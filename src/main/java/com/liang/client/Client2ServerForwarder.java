@@ -19,10 +19,13 @@ import java.net.Socket;
 public class Client2ServerForwarder implements Runnable{
     private final Socket socketLan;
     private final AESUtil aesUtil;
-    public Client2ServerForwarder(Socket socketLan) {
+    private final Socket client2serverSocket;
+
+    public Client2ServerForwarder(Socket socketLan, Socket client2serverSocket) {
         log.info("Client\t{}开启客户端向服务端的端口消息转发", socketLan);
         this.socketLan = socketLan;
         aesUtil = new AESUtil();
+        this.client2serverSocket = client2serverSocket;
     }
 
     @Override

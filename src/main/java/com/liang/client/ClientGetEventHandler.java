@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Arrays;
 
 /**
  * @Description: 客户端接收到事件的处理
@@ -54,7 +53,7 @@ public class ClientGetEventHandler implements Runnable{
         int localPort = ClientMapUtil.remotePortMap.get(remotePort).getLocalPort();
         Socket socket = new Socket(localIp, localPort); // 建立连接
         // TODO 判断是否连接成功 并反馈
-        new Thread(new Client2ServerForwarder(socket)).start();
+        new Thread(new Client2ServerForwarder(socket, client2serverSocket)).start();
         ClientMapUtil.socketLanMap.put(socket, nameBytes);
         ClientMapUtil.socketStringLanMap.put(new String(nameBytes), socket);
     }
