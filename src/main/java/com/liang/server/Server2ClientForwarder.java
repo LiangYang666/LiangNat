@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Arrays;
 
 /**
  * @Description: 监听已经建立了连接的socket 得到数据时则进行转发
@@ -39,13 +38,6 @@ public class Server2ClientForwarder implements Runnable{
                 OutputStream out = server2clientSocket.getOutputStream(); // TODO 这里是否需要查看client2serverSocket是否已经关闭
                 if (read == -1){
                     log.info("Server\t转发消息时，云端口[{}]输入流结束", socketWan.getLocalPort());
-                    synchronized (out){
-                        out.write(MessageFlag.eventCloseConnect);
-                        out.write(socketWanNameEncryptBytes.length);
-                        out.write(socketWanNameEncryptBytes);
-//                        out.flush();
-                    }
-                    log.info("Server\t转发关闭连接标志，携带[{}]", socketWan);
                     break;
                 }
                 byte[] encryptedData = aesUtil.encrypt(data, 0, read);
@@ -67,6 +59,18 @@ public class Server2ClientForwarder implements Runnable{
         }
         try {
             socketWan.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            OutputStream out = server2clientSocket.getOutputStream();
+            synchronized (out){
+                out.write(MessageFlag.eventCloseConnect);
+                out.write(socketWanNameEncryptBytes.length);
+                out.write(socketWanNameEncryptBytes);
+//                out.flush();
+                log.info("Server\t转发关闭连接标志，携带[{}]", socketWan);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
