@@ -30,12 +30,11 @@ public class ServerHeartbeatHandler implements Runnable{
             while (true){
                 Thread.sleep(HeartbeatUtil.sendInterval);
                 OutputStream out = server2clientSocket.getOutputStream();
-                HeartbeatUtil pac = new HeartbeatUtil();
                 synchronized (out){
                     out.write(MessageFlag.eventHeartbeat);
                     out.write(encryptBytes);
                 }
-                log.trace("Server\t发送心跳包：{}", pac);
+                log.trace("Server\t发送心跳包至{}", server2clientSocket.getRemoteSocketAddress());
             }
         }catch (Exception e){
             e.printStackTrace();
