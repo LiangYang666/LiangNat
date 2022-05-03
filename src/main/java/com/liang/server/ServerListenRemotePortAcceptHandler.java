@@ -55,7 +55,7 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
 //                        out.flush();
                     }
                     log.trace("Server\t新连接请求发送完成");
-                    new Thread(new Server2ClientForwarder(socketWan, server2clientSocket)).start();
+                    new Thread(new Server2ClientForwarder(socketWan, server2clientSocket), "S2C_forward-"+socketWan).start();
                 } else {
                     log.warn("Server\t客户端断开了连接->{}", server2clientSocket);
                     break;
