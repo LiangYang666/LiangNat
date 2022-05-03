@@ -1,15 +1,11 @@
 package com.liang.client;
 
-import com.liang.common.AESUtil;
-import com.liang.common.ByteUtil;
-import com.liang.common.IOReadUtil;
-import com.liang.common.MessageFlag;
+import com.liang.common.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+
 
 /**
  * @Description: 客户端接收到事件的处理
@@ -20,15 +16,20 @@ import java.net.Socket;
 public class ClientGetEventHandler implements Runnable{
     private final Socket client2serverSocket;
     private final AESUtil aesUtil;
+    private final HeartbeatUtil heartbeatUtil;
 
     public ClientGetEventHandler(Socket socket) {
         this.client2serverSocket = socket;
         log.info("Client\t开始事件监听");
         aesUtil = new AESUtil();
+        heartbeatUtil = new HeartbeatUtil();
+        heartbeatUtil.setLastHeartbeatTime(System.currentTimeMillis());
+        new Thread(new ClientHeartbeatHandler(client2serverSocket, heartbeatUtil),
+                "clientHeartbeat"+client2serverSocket).start();
     }
+
     public void newConnectHandler(InputStream in) throws IOException {
         log.trace("Client\t进入新连接处理");
-        int read;
         byte[] portEncryptedBytes = new byte[16];
         if (!IOReadUtil.readFixedLength(in, portEncryptedBytes)) {
             log.warn("Server\t新连接事件异常, 端口号读取异常");
@@ -96,6 +97,7 @@ public class ClientGetEventHandler implements Runnable{
 //        out.flush();
         log.trace("Client\t本次转发事件完成，消息体长度解密前{}/后{},转发携带{}，转发至{}", encryptedData.length, data.length, new String(nameBytes), socketLan);
     }
+
     public void closeConnect(InputStream in) throws IOException {
         log.trace("Client\t处理关闭连接事件");
         int nameCount = in.read();
@@ -115,6 +117,21 @@ public class ClientGetEventHandler implements Runnable{
         socketLan.close();
         log.info("Client\t处理关闭连接事件完成，成功关闭并移除socketLan{}", socketLan);
     }
+
+    public void heartbeatListen(InputStream in) throws IOException {
+        byte[] bytes = new byte[16];
+        if(!IOReadUtil.readFixedLength(in, bytes)){
+            log.warn("Client\t心跳事件异常，读取心跳包错误");
+            return;
+        }
+        bytes = aesUtil.decrypt(bytes);
+        if (!new String(bytes).equals("heart")){
+            log.warn("Client\t心跳事件异常，心跳包内容错误");
+            return;
+        }
+        heartbeatUtil.setLastHeartbeatTime(System.currentTimeMillis());
+    }
+
     @Override
     public void run() {
         while (client2serverSocket.isConnected() && !client2serverSocket.isClosed()) {
@@ -134,6 +151,8 @@ public class ClientGetEventHandler implements Runnable{
                     closeConnect(in);
                 } else if (eventIndex == MessageFlag.eventForward){
                     forward(in);
+                } else if (eventIndex == MessageFlag.eventHeartbeat){
+                    heartbeatListen(in);
                 }else {
                     log.warn("Client\t无效事件索引： " + eventIndex);
                 }

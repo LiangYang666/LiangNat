@@ -32,12 +32,17 @@ public class MessageFlag {
     // 再后面4个字节表示消息内容的长度dataLength，最长为1024长度(由于加密，当恰好为1024时将会+16)
     // 之后的dataLength个字节表示加密后的消息
 
+    public static final int eventHeartbeat = 5;
+    // 是心跳检测事件
+    // 后面的内容表示心跳包
+
     static public String getComment(int flag){
         switch(flag) {
             case eventLogin: return "eventLogin ["+flag+"]";
             case eventNewConnect: return "eventNewConnect ["+flag+"]";
             case eventCloseConnect: return "eventCloseConnect ["+flag+"]";
             case eventForward: return "eventForward ["+flag+"]";
+            case eventHeartbeat: return "eventHeartbeat ["+flag+"]";
             default: return "invalid flag ["+flag+"]";
         }
     }

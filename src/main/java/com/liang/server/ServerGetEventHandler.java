@@ -35,6 +35,9 @@ class ServerGetEventHandler implements Runnable{
         listenSocketList = new ArrayList<>();
         log.info("Server\t开始事件监听");
         aesUtil = new AESUtil();
+        new Thread(new ServerHeartbeatHandler(server2clientSocket),
+                "HeartbeatHandler"+server2clientSocket.getRemoteSocketAddress())
+                .start();   // 开启心跳检测线程
     }
 
     public int loginHandler(InputStream in) throws IOException {

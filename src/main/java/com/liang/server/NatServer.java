@@ -6,6 +6,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
@@ -14,10 +15,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
- * @Description: TODO
+ * @Description: 服务端
  * @Author: LiangYang
  * @Date: 2022/4/27 上午9:24
  **/
@@ -46,9 +49,9 @@ public class NatServer {
         log.info("Server\t服务启动，开始监听端口 "+ bindPort);
 
         while (true){
-            Socket wanSocket = serverSocket.accept();
-            log.info("Server\t服务端口接收到连接请求 来自{}", wanSocket.getRemoteSocketAddress());
-            new Thread(new ServerGetEventHandler(wanSocket, token), "ServerGetEvent"+wanSocket.getRemoteSocketAddress()).start();   // 开启事件监听
+            Socket server2clientSocket = serverSocket.accept();
+            log.info("Server\t服务端口接收到连接请求 来自{}", server2clientSocket.getRemoteSocketAddress());
+            new Thread(new ServerGetEventHandler(server2clientSocket, token), "ServerGetEvent"+server2clientSocket.getRemoteSocketAddress()).start();   // 开启事件监听
         }
     }
 }
