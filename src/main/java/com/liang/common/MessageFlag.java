@@ -34,7 +34,7 @@ public class MessageFlag {
 
     public static final int eventHeartbeat = 5;
     // 是心跳检测事件
-    // 后面的内容表示心跳包
+    // 后面的内容表示心跳包，目前为加密后的16字节"heart"字符串
 
     static public String getComment(int flag){
         switch(flag) {

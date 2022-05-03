@@ -158,7 +158,7 @@ class ServerGetEventHandler implements Runnable{
                 int eventIndex;
                 eventIndex = in.read();
                 if (eventIndex==-1) {
-                    log.info("Server\tsocket对应的输入流关闭: {} ", server2clientSocket.getRemoteSocketAddress());
+                    log.warn("Server\tsocket对应的输入流关闭: {} ", server2clientSocket.getRemoteSocketAddress());
                     server2clientSocket.close();
                 }
                 log.trace("Server\t收到事件: " + MessageFlag.getComment(eventIndex));
