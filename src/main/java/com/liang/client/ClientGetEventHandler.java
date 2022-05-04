@@ -54,7 +54,7 @@ public class ClientGetEventHandler implements Runnable{
         int localPort = ClientMapUtil.remotePortMap.get(remotePort).getLocalPort();
         Socket socket = new Socket(localIp, localPort); // 建立连接
         // TODO 判断是否连接成功 并反馈
-        new Thread(new Client2ServerForwarder(socket, client2serverSocket), "C2S_forward-"+socket).start();
+        new Thread(new Client2ServerForwarder(socket, client2serverSocket), "c2sForward"+socket).start();
         ClientMapUtil.socketLanMap.put(socket, nameBytes);
         ClientMapUtil.socketStringLanMap.put(new String(nameBytes), socket);
     }
