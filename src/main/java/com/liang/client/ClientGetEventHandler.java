@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -16,15 +17,14 @@ import java.net.Socket;
 public class ClientGetEventHandler implements Runnable{
     private final Socket client2serverSocket;
     private final AESUtil aesUtil;
-    private final HeartbeatUtil heartbeatUtil;
+    private final AtomicLong lastTime = new AtomicLong(0);
 
     public ClientGetEventHandler(Socket socket) {
         this.client2serverSocket = socket;
         log.info("Client\t开始事件监听");
         aesUtil = new AESUtil();
-        heartbeatUtil = new HeartbeatUtil();
-        heartbeatUtil.setLastHeartbeatTime(System.currentTimeMillis());
-        new Thread(new ClientHeartbeatHandler(client2serverSocket, heartbeatUtil),
+        lastTime.set(System.currentTimeMillis());
+        new Thread(new ClientHeartbeatHandler(client2serverSocket, lastTime),
                 "clientHeartbeat"+client2serverSocket).start();
     }
 
@@ -129,7 +129,7 @@ public class ClientGetEventHandler implements Runnable{
             log.warn("Client\t心跳事件异常，心跳包内容错误");
             return;
         }
-        heartbeatUtil.setLastHeartbeatTime(System.currentTimeMillis());
+        lastTime.set(System.currentTimeMillis());
     }
 
     @Override
