@@ -2,6 +2,7 @@ package com.liang.client;
 
 import com.liang.common.AESUtil;
 import com.liang.common.ByteUtil;
+import com.liang.common.ForwardHeartListenHandler;
 import com.liang.common.MessageFlag;
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @Description: 客户端监听本地端口 有消息时向服务端转发
@@ -20,12 +22,16 @@ public class Client2ServerForwarder implements Runnable{
     private final Socket socketLan;
     private final AESUtil aesUtil;
     private final Socket client2serverSocket;
+    private final AtomicLong lastGetTime = new AtomicLong();
 
     public Client2ServerForwarder(Socket socketLan, Socket client2serverSocket) {
         log.info("Client\t{}开启客户端向服务端的端口消息转发", socketLan);
         this.socketLan = socketLan;
         aesUtil = new AESUtil();
         this.client2serverSocket = client2serverSocket;
+        lastGetTime.set(System.currentTimeMillis());
+        new Thread(new ForwardHeartListenHandler("Server", socketLan, lastGetTime),
+                "c2sForwardHeartListen"+socketLan).start();
     }
 
     @Override

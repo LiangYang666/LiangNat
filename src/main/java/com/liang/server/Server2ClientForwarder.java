@@ -2,6 +2,7 @@ package com.liang.server;
 
 import com.liang.common.AESUtil;
 import com.liang.common.ByteUtil;
+import com.liang.common.ForwardHeartListenHandler;
 import com.liang.common.MessageFlag;
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @Description: 监听已经建立了连接的socket 得到数据时则进行转发
@@ -19,10 +21,14 @@ import java.net.Socket;
 public class Server2ClientForwarder implements Runnable{
     private final Socket socketWan;
     private final Socket server2clientSocket;
+    private final AtomicLong lastGetTime = new AtomicLong();
     public Server2ClientForwarder(Socket socketWan, Socket server2clientSocket) {
         this.socketWan = socketWan;
         this.server2clientSocket = server2clientSocket;
         log.info("Server\t{}开启服务端向客户端的端口消息转发", socketWan);
+        lastGetTime.set(System.currentTimeMillis());
+        new Thread(new ForwardHeartListenHandler("Client", socketWan, lastGetTime),
+                "s2cForwardHeartListen"+socketWan).start();
     }
 
     @Override
@@ -33,6 +39,7 @@ public class Server2ClientForwarder implements Runnable{
         byte[] socketWanNameEncryptBytes = aesUtil.encrypt(socketWanNameBytes);
         while (socketWan.isConnected() && !socketWan.isClosed()){
             try {
+                lastGetTime.set(System.currentTimeMillis());
                 InputStream in = socketWan.getInputStream();
                 int read = in.read(data);
                 OutputStream out = server2clientSocket.getOutputStream(); // TODO 这里是否需要查看client2serverSocket是否已经关闭
