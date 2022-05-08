@@ -1,3 +1,3 @@
 common:
-  bind_port: 10101
-  token: 123456
+  bind_port: 10101    # 服务端口  可更换，保持与客户端一致即可
+  token: 123456       # 密码

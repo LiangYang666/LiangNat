@@ -1,23 +1,20 @@
 common:
-  server_addr: 127.0.0.1
-  server_port: 10101
-  token: 123456
+  server_addr: 127.0.0.1    # 云服务器地址
+  server_port: 10101      # 云服务器服务端口  与服务端配置一致
+  token: 123456         # 登录密码 与服务端配置一致
 
 nat:
-  vnc-21:
-    type: tcp
-    local_ip: 192.168.0.202
-    local_port: 5901
-    remote_port: 45901
 
   ssh-2:
     type: tcp
-    local_ip: 192.168.0.202
-    local_port: 22
-    remote_port: 40022
+    local_ip: 127.0.0.1 # 需要被映射的内网机器的IP
+    local_port: 22      # 需要被映射的内网机器的端口
+    remote_port: 40022  # 对应的云端服务器映射端口    # 达到的效果是访问 server_addr+40022 相当于局域网内local_ip+local_port
 
-  vnc-25:
+  vnc-21:
     type: tcp
-    local_ip: 192.168.0.202
-    local_port: 5905
-    remote_port: 45905
+    local_ip: 127.0.0.1
+    local_port: 5901
+    remote_port: 45901
+
+
