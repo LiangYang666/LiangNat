@@ -26,15 +26,18 @@ public class Server {
     public static void main(String[] args) throws IOException {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger logger = loggerContext.getLogger("root");
+        String configFilePath = "config_server.yaml";
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("trace")){
                 logger.setLevel(Level.TRACE);
             } else if(args[i].equals("info")){
                 logger.setLevel(Level.INFO);
             }
+            if (args[i].endsWith(".yaml")){
+                configFilePath = args[i];
+            }
         }
-
-        FileInputStream in = new FileInputStream("config_server.yaml");
+        FileInputStream in = new FileInputStream(configFilePath);
         Yaml yaml = new Yaml();
         Map map = yaml.loadAs(in, Map.class);
         Map common = (Map) map.get("common");

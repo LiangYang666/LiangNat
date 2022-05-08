@@ -26,8 +26,8 @@ import java.util.Map;
 public class Client {
     static Socket client2serverSocket;
 
-    public static ClientConfig clientInitConfig() throws FileNotFoundException {
-        FileInputStream in = new FileInputStream("config_client.yaml");
+    public static ClientConfig clientInitConfig(String configFilePath) throws FileNotFoundException {
+        FileInputStream in = new FileInputStream(configFilePath);
         Yaml yaml = new Yaml();
         Map config = yaml.loadAs(in, Map.class);
         System.out.println(config);
@@ -53,14 +53,18 @@ public class Client {
     public static void main(String[] args) throws FileNotFoundException {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger logger = loggerContext.getLogger("root");
+        String configFilePath = "config_client.yaml";
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("trace")){
                 logger.setLevel(Level.TRACE);
             } else if(args[i].equals("info")){
                 logger.setLevel(Level.INFO);
             }
+            if (args[i].endsWith(".yaml")){
+                configFilePath = args[i];
+            }
         }
-        ClientConfig clientConfig = clientInitConfig();
+        ClientConfig clientConfig = clientInitConfig(configFilePath);
         List<ClientPortMapConfig> portWantMap = clientConfig.getPortMap();
         for (int i = 0; i < portWantMap.size(); i++) {
             ClientMapUtil.remotePortMap.put(portWantMap.get(i).getRemotePort(), portWantMap.get(i));
