@@ -3,7 +3,7 @@ package com.liang.common;
 import java.nio.ByteBuffer;
 
 /**
- * @Description: TODO
+ * @Description: 字节与各种类型转换
  * @Author: LiangYang
  * @Date: 2022/4/27 下午3:23
  **/

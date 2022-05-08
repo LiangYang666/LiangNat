@@ -1,7 +1,7 @@
 package com.liang.common;
 
 /**
- * @Description: TODO
+ * @Description: 各种通信消息的标志定义
  * @Author: LiangYang
  * @Date: 2022/4/27 下午2:55
  **/

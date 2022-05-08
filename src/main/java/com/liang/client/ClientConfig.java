@@ -3,7 +3,7 @@ package com.liang.client;
 import java.util.List;
 
 /**
- * @Description: TODO
+ * @Description: 客户端配置文件
  * @Author: LiangYang
  * @Date: 2022/4/27 下午5:05
  **/

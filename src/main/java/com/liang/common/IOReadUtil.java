@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @Description: TODO
+ * @Description: IO读取工具，用于读取固定长度函数
  * @Author: LiangYang
  * @Date: 2022/5/2 下午8:27
  **/
