@@ -58,7 +58,7 @@ public class Client2ServerForwarder implements Runnable{
                     out.write(encryptedData);
 //                    out.flush();
                 }
-                log.trace("Client\t本地端口转发消息成功，消息体长度加密前{}/后{}，转发携带{}，转发至{}",read, encryptedData.length, new String(remoteSocketWanNameBytes), NatClient.client2serverSocket);
+                log.trace("Client\t本地端口转发消息成功，消息体长度加密前{}/后{}，转发携带{}，转发至{}",read, encryptedData.length, new String(remoteSocketWanNameBytes), this.client2serverSocket);
 
             } catch (IOException e) {
                 e.printStackTrace();

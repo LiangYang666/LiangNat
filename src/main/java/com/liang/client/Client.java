@@ -23,7 +23,7 @@ import java.util.Map;
  * @Date: 2022/4/27 下午4:47
  **/
 @Slf4j
-public class NatClient {
+public class Client {
     static Socket client2serverSocket;
 
     public static ClientConfig clientInitConfig() throws FileNotFoundException {

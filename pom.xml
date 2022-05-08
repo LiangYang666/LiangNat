@@ -67,7 +67,7 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <!--设置主类 即运行java -jar xxx.jar时执行指定的类中的main方法-->
-                                    <mainClass>com.liang.server.NatServer</mainClass>
+                                    <mainClass>com.liang.server.Server</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -83,7 +83,7 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <!--设置主类 即运行java -jar xxx.jar时执行指定的类中的main方法-->
-                                    <mainClass>com.liang.client.NatClient</mainClass>
+                                    <mainClass>com.liang.client.Client</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
