@@ -1,5 +1,6 @@
 package com.liang.web.service;
 
+import com.liang.server.AllowedIpUtil;
 import com.liang.web.dao.IpDao;
 import com.liang.web.entity.IpEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +25,13 @@ public class IpService {
     }
 
     public void saveIp(IpEntity ipEntity){
+        AllowedIpUtil.ipSets.add(ipEntity.getIp()); //添加到内存
         String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         ipEntity.setCreateTime(time);
         ipDao.insert(ipEntity);
     }
     public void deleteByIp(String ip){
+        AllowedIpUtil.ipSets.remove(ip);    // 内存中也删除
         ipDao.deleteById(ip);
     }
     public IpEntity getByIp(String ip){
@@ -38,4 +41,5 @@ public class IpService {
     public void updateIp(IpEntity allowedIp) {
         ipDao.updateById(allowedIp);
     }
+
 }

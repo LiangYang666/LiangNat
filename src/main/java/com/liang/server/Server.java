@@ -52,7 +52,7 @@ public class Server {
         Object tokenRaw = common.get("token");
         String token = tokenRaw == null ? "123456" : tokenRaw.toString();
 
-//        new Thread(new ServerStart(bindPort, token)).start();   // 以线程方式启动
+        new Thread(new ServerStart(bindPort, token), "ServerMain").start();   // 以线程方式启动
         if (map.get("web")!=null){  // 如果有该参数，那么意味着使用web进行管理ip 不在ip白名单内的将不允许连接
             Map web = (Map) map.get("web");
             Integer web_port = (Integer) web.get("bind_port");

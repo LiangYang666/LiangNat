@@ -7,8 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 
 /**
  * @Description: 处理那些客户端需要我们监听的端口，这里只监听新的连接请求
@@ -37,6 +39,12 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
                 && !listenSocket.isClosed()){
             try {
                 Socket socketWan = listenSocket.accept();
+                String inetAddress = socketWan.getInetAddress().toString().substring(1);
+                if (!AllowedIpUtil.ipSets.contains(inetAddress)){
+                    log.info("Server\t云端端口[{}]接收到{}的连接，但不被允许", port, inetAddress);
+                    socketWan.close();
+                    continue;
+                }
                 log.info("Server\t云端端口[{}]接收到连接,生成socketWan:{}", port, socketWan);
                 assert socketWan.isConnected();
                 String socketWanStr = socketWan.toString();
