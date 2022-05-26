@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite::resource:static/testDB.db
+    username:
+    password:
+  # thymeleaf配置
+  thymeleaf:
+    cache: false
+    mode: HTML5
+    encoding: UTF-8
+    suffix: .html
+
+# mybatis-plus配置
+mybatis-plus:
+  mapper-locations: classpath:mappering/*.xml
+  #实体扫描，多个package用逗号或者分号分隔
+  type-aliases-package: com.liang.web.entity
+server:
+  port: 10102

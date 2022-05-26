@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+    <style>
+        .loginForm {
+            /*边框高度*/
+            height: 350px;
+            /*边框宽度*/
+            width: 500px;
+            /*边框颜色*/
+            border: #4d4d4d solid 1px;
+            /*边框圆角*/
+            border-radius: 4px;
+            /*阴影 水平方向，竖直方向，模糊距离*/
+            box-shadow: 5px 5px 5px #4d4d4d;
+            /*上边界距离*/
+            margin-top: 300px;
+            /*左边界距离：自动*/
+            margin-left: auto;
+            /*右边界距离：自动*/
+            margin-right: auto;
+            /*用户名、密码间距*/
+            padding: 20px 40px;
+        }
+
+        /*将用户登录置于中间*/
+        .loginForm h2 {
+            text-align: center;
+        }
+
+        /*修改button属性*/
+        .button {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+<div class="loginForm">
+    <h2>管理员登录</h2>
+    <form id="form_login" name="loginForm" method="post" action="/doLogin" autocomplete="off">
+        <div class="form-group">
+            <label for="exampleInputEmail1">用户名</label>
+            <input type="text" class="form-control" id="exampleInputEmail1" name="username"  value="admin" placeholder="请输入用户名">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">密码</label>
+            <input type="password" class="form-control" id="exampleInputPassword1" placeholder="请输入密码" name="password"  title="请输入密码" autocomplete="on">
+        </div>
+        <div class="button">
+            <input type="submit" class="btn btn-primary" value="登 录"/>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

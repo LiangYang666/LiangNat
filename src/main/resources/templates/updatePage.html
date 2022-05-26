@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>修改IP信息</title>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+</head>
+<body>
+
+<div th:replace="header :: header"></div>
+<div style="width:800px;height:100%;margin-left:270px;margin-top:80px;">
+    <form action="/update" method="post">
+        IP：<input class="form-control"  type="text" th:value="${ip.ip}" name="ip" readonly="readonly"><br>
+        IP属地：<input class="form-control" type="text" th:value="${ip.address}" name="address"><br>
+        备 注：<input class="form-control" type="text" th:value="${ip.comment}" name="comment"><br>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">提交</button>
+    </form>
+</div>
+
+</body>
+</html>

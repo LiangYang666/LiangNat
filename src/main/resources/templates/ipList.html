@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>允许IP列表</title>
+    <link href="/css/bootstrap.css" rel="stylesheet">
+</head>
+
+<style>
+    a{
+        color:#fff;
+    }
+</style>
+
+<body>
+<!--头部-->
+<div th:replace="header :: header"></div>
+<!--<button class="btn btn-primary form-control" style="height:50px"><a th:href="@{'/insertPage'}">添加允许IP</a></button>-->
+<div class="container-fluid" style="margin-top:80px">
+    <table class="table table-striped table-bordered table-hover text-center">
+        <thead>
+        <tr style="text-align:center">
+            <th>IP白名单</th>
+            <th>IP属地</th>
+            <th>创建时间</th>
+            <th>备注</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="ip_info:${ips}">
+            <td th:text="${ip_info.ip}"></td>
+            <td th:text="${ip_info.address}"></td>
+            <td th:text="${ip_info.createTime}"></td>
+            <td th:text="${ip_info.comment}"></td>
+            <td>
+                <a class="btn btn-primary" th:href="@{'/updatePage/'+${ip_info.ip}}">更改</a>
+                <a class="btn btn-danger" th:href="@{'/delete/'+${ip_info.ip}}">删除</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
