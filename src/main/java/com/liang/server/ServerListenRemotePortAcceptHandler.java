@@ -40,7 +40,7 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
             try {
                 Socket socketWan = listenSocket.accept();
                 String inetAddress = socketWan.getInetAddress().toString().substring(1);
-                if (!AllowedIpUtil.ipSets.contains(inetAddress)){
+                if (AllowedIpUtil.ipSets.contains("web_control") && !AllowedIpUtil.ipSets.contains(inetAddress)){
                     log.info("Server\t云端端口[{}]接收到{}的连接，但不被允许", port, inetAddress);
                     socketWan.close();
                     continue;

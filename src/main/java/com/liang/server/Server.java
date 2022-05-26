@@ -54,13 +54,13 @@ public class Server {
 
         new Thread(new ServerStart(bindPort, token), "ServerMain").start();   // 以线程方式启动
         if (map.get("web")!=null){  // 如果有该参数，那么意味着使用web进行管理ip 不在ip白名单内的将不允许连接
+            AllowedIpUtil.ipSets.add("web_control");  // 使用web管理
             Map web = (Map) map.get("web");
             Integer web_port = (Integer) web.get("bind_port");
             String username = web.get("username") == null? "admin":web.get("username").toString();
             String password = web.get("password") == null? "123456":web.get("password").toString();
             WebApp.start(web_port, username, password, args);
         }
-
     }
     static class ServerStart implements Runnable{
         ServerSocket serverSocket;
