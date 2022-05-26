@@ -44,7 +44,7 @@
     <form id="form_login" name="loginForm" method="post" action="/doLogin" autocomplete="off">
         <div class="form-group">
             <label for="exampleInputEmail1">用户名</label>
-            <input type="text" class="form-control" id="exampleInputEmail1" name="username"  value="admin" placeholder="请输入用户名">
+            <input type="text" class="form-control" id="exampleInputEmail1" name="username"  th:value="${username}" placeholder="请输入用户名">
         </div>
         <div class="form-group">
             <label for="exampleInputPassword1">密码</label>

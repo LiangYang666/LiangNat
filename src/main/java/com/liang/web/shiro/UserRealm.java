@@ -7,6 +7,7 @@ import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @Description: TODO
@@ -14,6 +15,10 @@ import org.apache.shiro.subject.PrincipalCollection;
  * @Date: 2022/5/25 下午11:57
  **/
 public class UserRealm extends AuthorizingRealm {
+    @Value("${web.username}")
+    private String username;
+    @Value("${web.password}")
+    private String password;
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         return null;
@@ -21,10 +26,10 @@ public class UserRealm extends AuthorizingRealm {
 
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        String username = (String) authenticationToken.getPrincipal();
-        if (!username.equals("admin")) {
+        String usernameGet = (String) authenticationToken.getPrincipal();
+        if (!usernameGet.equals(username)) {
             throw new AuthenticationException("用户名不正确");
         }
-        return new SimpleAuthenticationInfo(username, "123456", getName());
+        return new SimpleAuthenticationInfo(usernameGet, password, getName());
     }
 }

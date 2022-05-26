@@ -1,3 +1,8 @@
 common:
   bind_port: 10101    # 服务端口  可更换，保持与客户端一致即可
   token: 123456       # 密码
+
+web:
+  bind_port: 10102  # 网页管理登录端口，可管理IP白名单
+  username: admin   # 登录用户名
+  password: 123456  # 登录密码
