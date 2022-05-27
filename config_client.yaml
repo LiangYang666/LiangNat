@@ -4,7 +4,6 @@ common:
   token: 123456         # 登录密码 与服务端配置一致
 
 nat:
-
   ssh-2:
     type: tcp
     local_ip: 127.0.0.1 # 需要被映射的内网机器的IP
@@ -17,7 +16,7 @@ nat:
     local_port: 5901
     remote_port: 45901
 
-socks5_proxy: # 代理
+socks5_proxy: # 代理 将浏览器的代理或系统代理改为 socks5,server_addr:7999 实现代理学校内网上网
   type: tcp
   remote_port: 7999
 

@@ -3,6 +3,6 @@ common:
   token: 123456       # 密码
 
 web:
-  bind_port: 10102  # 网页管理登录端口，可管理IP白名单
+  bind_port: 10102  # 网页管理登录端口，可管理IP白名单 浏览器输入server_addr:10102可登录
   username: admin   # 登录用户名
   password: 123456  # 登录密码
