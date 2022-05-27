@@ -133,8 +133,8 @@ public class Socks5ProxyHandler implements Runnable {
             if (handleSocks5Handshake(input, output)){
                 if (handleSock5Connection(input, output)){
                     agentSocket = new Socket(remoteAddress, remotePort); // 代理socket 即真正访问目标资源的socket
-                    Thread th1 = new Thread(new StreamForwardHandler(input, agentSocket.getOutputStream()), "Socks5Forward" + socketProxyTransfer + "-->" + agentSocket);
-                    Thread th2 = new Thread(new StreamForwardHandler(agentSocket.getInputStream(), output), "Socks5Forward" + agentSocket + "-->" + socketProxyTransfer);
+                    Thread th1 = new Thread(new StreamForwardHandler(input, agentSocket.getOutputStream()), "Socks5Forward-" + socketProxyTransfer + "-->" + agentSocket);
+                    Thread th2 = new Thread(new StreamForwardHandler(agentSocket.getInputStream(), output), "Socks5Forward-" + agentSocket + "-->" + socketProxyTransfer);
                     th1.start();
                     th2.start();
                     th1.join();

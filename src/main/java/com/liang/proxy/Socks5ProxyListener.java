@@ -28,7 +28,7 @@ public class Socks5ProxyListener implements Runnable{
             while (client2serverSocket.isConnected() && !client2serverSocket.isClosed()) {
                 Socket socketProxyTransfer = proxyLocalServerSocket.accept();
                 log.trace("Socks5\t本地代理监听端口接收到连接请求{}", socketProxyTransfer);
-                new Thread(new Socks5ProxyHandler(socketProxyTransfer), "Socks5ProxyHandler"+socketProxyTransfer).start();
+                new Thread(new Socks5ProxyHandler(socketProxyTransfer), "Socks5ProxyHandler-"+socketProxyTransfer).start();
             }
         } catch (Exception e) {
             e.printStackTrace();
