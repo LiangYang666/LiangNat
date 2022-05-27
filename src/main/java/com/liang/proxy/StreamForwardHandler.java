@@ -26,8 +26,14 @@ public class StreamForwardHandler implements Runnable{
             while ((len = in.read(buffer)) != -1) {
                 out.write(buffer, 0, len);
             }
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        try {
+            out.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
