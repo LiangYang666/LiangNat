@@ -78,7 +78,7 @@ public class Client2ServerForwarder implements Runnable{
                 out.write(encryptedRemoteSocketWanNameBytes.length);
                 out.write(encryptedRemoteSocketWanNameBytes);
 //                out.flush();
-                log.info("Client\t转发关闭连接标志，携带[{}]", new String(remoteSocketWanNameBytes));
+                log.trace("Client\t转发关闭连接标志，携带[{}]", new String(remoteSocketWanNameBytes));
             }
         } catch (IOException e) {
             e.printStackTrace();

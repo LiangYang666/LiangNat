@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @Description: TODO
+ * @Description: 主启动类，不使用springboot插件打包，其它上游方法进行调用来启动springboot
  * @Author: LiangYang
  * @Date: 2022/5/26 下午2:37
  **/

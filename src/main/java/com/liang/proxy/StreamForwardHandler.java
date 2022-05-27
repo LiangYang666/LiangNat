@@ -5,13 +5,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * @Description: TODO
+ * @Description: 数据流转发线程
  * @Author: LiangYang
  * @Date: 2022/5/27 上午12:55
  **/
 public class StreamForwardHandler implements Runnable{
-    private InputStream in;
-    private OutputStream out;
+    private final InputStream in;
+    private final OutputStream out;
 
     public StreamForwardHandler(InputStream in, OutputStream out) {
         this.in = in;

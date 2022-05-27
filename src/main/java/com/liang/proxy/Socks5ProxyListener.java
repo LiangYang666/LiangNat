@@ -7,7 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
- * @Description: TODO
+ * @Description: socks5服务监听线程，有连接时新建线程进行验证和处理
  * @Author: LiangYang
  * @Date: 2022/5/26 下午10:57
  **/

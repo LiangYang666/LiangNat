@@ -9,7 +9,9 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 /**
- * @Description: TODO
+ * @Description: 处理socks5代理，该线程主要处理连接请求，当有新连接到socks代理监听端口时，
+ *               先按照socks5协议进行握手和代理协议的连接，连接建立后获得对方想要请求的目标地址+端口（remoteAddress+remotePort）
+ *               然后本线程建立一个agentSocket来对资源进行访问连接，新建两个转发线程来控制数据的转发
  * @Author: LiangYang
  * @Date: 2022/5/26 下午11:14
  **/
@@ -62,7 +64,7 @@ public class Socks5ProxyHandler implements Runnable {
         }
         return sb.toString();
     }
-    public boolean handleSock5Connection(InputStream in, OutputStream out) throws IOException {
+    public boolean handleSocks5Connection(InputStream in, OutputStream out) throws IOException {
         byte[] bytes = new byte[4];
         if (!IOReadUtil.readFixedLength(in, bytes)){
             return false;
@@ -131,7 +133,7 @@ public class Socks5ProxyHandler implements Runnable {
             InputStream input = socketProxyTransfer.getInputStream();
             OutputStream output = socketProxyTransfer.getOutputStream();
             if (handleSocks5Handshake(input, output)){
-                if (handleSock5Connection(input, output)){
+                if (handleSocks5Connection(input, output)){
                     agentSocket = new Socket(remoteAddress, remotePort); // 代理socket 即真正访问目标资源的socket
                     Thread th1 = new Thread(new StreamForwardHandler(input, agentSocket.getOutputStream()), "Socks5Forward-" + socketProxyTransfer + "-->" + agentSocket);
                     Thread th2 = new Thread(new StreamForwardHandler(agentSocket.getInputStream(), output), "Socks5Forward-" + agentSocket + "-->" + socketProxyTransfer);

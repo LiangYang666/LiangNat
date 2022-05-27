@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * @Description: TODO
+ * @Description: 登录
  * @Author: LiangYang
  * @Date: 2022/5/26 上午12:20
  **/
 @Controller
 public class LoginController {
-    @Value("${web.username}")
+    @Value("${web.username}")   // 取配置中的username，未在application中定义，在WebApp.start中临时配置
     private String username;
     //如果需要使用shiro长期登陆，设置subject的rememberMe属性并且设置允许的范围为user。authc不允许被rememberMe用户访问。
     //这就是我们传入账号密码测试的地方

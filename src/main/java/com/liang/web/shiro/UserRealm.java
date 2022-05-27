@@ -10,7 +10,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
- * @Description: TODO
+ * @Description: UserRealm 定义授权和认证
  * @Author: LiangYang
  * @Date: 2022/5/25 下午11:57
  **/

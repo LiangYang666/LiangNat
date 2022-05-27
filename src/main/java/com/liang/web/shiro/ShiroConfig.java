@@ -11,7 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * @Description: TODO
+ * @Description: shiro配置类
  * @Author: LiangYang
  * @Date: 2022/5/26 上午12:04
  **/

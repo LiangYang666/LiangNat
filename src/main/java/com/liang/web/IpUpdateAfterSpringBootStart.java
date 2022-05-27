@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * @Description: TODO
+ * @Description: 用于Springboot启动后更新ip表，因为表存在sqlite数据库中
  * @Author: LiangYang
  * @Date: 2022/5/26 下午3:58
  **/

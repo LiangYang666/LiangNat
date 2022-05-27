@@ -5,12 +5,18 @@ import java.net.UnknownHostException;
 import java.util.HashSet;
 
 /**
- * @Description: TODO
+ * @Description: 设置允许IP的工具
  * @Author: LiangYang
  * @Date: 2022/5/26 下午3:47
  **/
 public class AllowedIpUtil {
-    static public HashSet<String> ipSets = new HashSet<>();
+    static public HashSet<String> ipSets = new HashSet<>(); // IP白名单，这其中的IP允许放行
+
+    /**
+     * 判断给定IP是不是cidrIP段的一部分，
+     * IP过滤策略，例如：一个IP是32位的，cidrIp为192.168.0.0/24时，
+     *              则只需要IP的前24位与给定IP相同即可，即192.168.0开头即可
+     */
     public static boolean checkIpBelongCIDR(String cidrIp, String ip) throws UnknownHostException {
         String[] cidrIpArr = cidrIp.split("/");
         String cidrIpPrefix = cidrIpArr[0];

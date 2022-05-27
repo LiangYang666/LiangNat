@@ -1,7 +1,7 @@
 package com.liang.web.utils;
 
 /**
- * @Description: TODO
+ * @Description: IP地址的属地信息获取工具类
  * @Author: LiangYang
  * @Date: 2022/5/25 下午9:58
  **/
