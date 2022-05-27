@@ -4,13 +4,11 @@ import com.liang.common.AESUtil;
 import com.liang.common.ByteUtil;
 import com.liang.common.MessageFlag;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketAddress;
+import java.net.*;
 
 /**
  * @Description: 处理那些客户端需要我们监听的端口，这里只监听新的连接请求
@@ -32,6 +30,23 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
         aesUtil = new AESUtil();
     }
 
+    public boolean checkIpIfPermission(String ip) throws UnknownHostException {  //判断该IP是否符合
+        if(!AllowedIpUtil.ipSets.contains("web_control")){  // 不需要控制
+            return true;
+        }
+        if (AllowedIpUtil.ipSets.contains(ip)){
+            return true;
+        }
+        for (String ipSet : AllowedIpUtil.ipSets) {
+            if (ipSet.contains("/")){
+                if (AllowedIpUtil.checkIpBelongCIDR(ipSet, ip)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public void run() {
         while  (server2clientSocket.isConnected()
@@ -40,8 +55,8 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
             try {
                 Socket socketWan = listenSocket.accept();
                 String inetAddress = socketWan.getInetAddress().toString().substring(1);
-                if (AllowedIpUtil.ipSets.contains("web_control") && !AllowedIpUtil.ipSets.contains(inetAddress)){
-                    log.info("Server\t云端端口[{}]接收到{}的连接，但不被允许", port, inetAddress);
+                if (!checkIpIfPermission(inetAddress)){
+                    log.info("Server\t防火墙拦截该连接，IP为{}", inetAddress);
                     socketWan.close();
                     continue;
                 }
