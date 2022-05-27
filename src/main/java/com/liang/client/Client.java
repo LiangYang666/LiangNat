@@ -99,9 +99,10 @@ public class Client {
                 out.write(ByteUtil.intToByteArray(encryptedPortsBytes.length));    // 写端口数组长度
                 out.write(encryptedPortsBytes);     // 写端口
                 // TODO: 判断云端是否接收成功，各端口是否成功监听
+                ServerSocket socks5ProxyServerSocket = null;
                 for (ClientPortMapConfig clientPortMapConfig : clientConfig.portMap) {
                     if (clientPortMapConfig.getName().equals(socks5Proxy)){  // 查看是否需要socks5_proxy代理
-                        ServerSocket socks5ProxyServerSocket = new ServerSocket(0); // 指定为0端口将会随机绑定一个端口
+                        socks5ProxyServerSocket = new ServerSocket(0); // 指定为0端口将会随机绑定一个端口
                         clientPortMapConfig.setLocalPort(socks5ProxyServerSocket.getLocalPort());   // 设置映射端口
                         new Thread(new Socks5ProxyListener(socks5ProxyServerSocket, client2serverSocket),
                                 "Socks5ProxyListener-bind-port"+socks5ProxyServerSocket.getLocalPort()).start();  // 开启本地代理监听
@@ -111,6 +112,9 @@ public class Client {
                 Thread workThread = new Thread(new ClientGetEventHandler(client2serverSocket), "ClientGetEvent"+client2serverSocket.getRemoteSocketAddress());
                 workThread.start(); // 开启事件监听
                 workThread.join();  // 等待线程结束
+                if (socks5ProxyServerSocket!=null){ // 关闭连接则需要将代理服务也关闭
+                    socks5ProxyServerSocket.close();
+                }
             }catch (ConnectException e) {
                 log.warn("目标"+e.getMessage());
                 e.printStackTrace();
