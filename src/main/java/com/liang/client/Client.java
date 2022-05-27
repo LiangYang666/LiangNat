@@ -6,12 +6,14 @@ import ch.qos.logback.classic.LoggerContext;
 import com.liang.common.AESUtil;
 import com.liang.common.ByteUtil;
 import com.liang.common.MessageFlag;
+import com.liang.proxy.Socks5ProxyListener;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.net.ConnectException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +27,13 @@ import java.util.Map;
 @Slf4j
 public class Client {
     static Socket client2serverSocket;
+    static final String socks5Proxy = "socks5_proxy";
 
     public static ClientConfig clientInitConfig(String configFilePath) throws FileNotFoundException {
         FileInputStream in = new FileInputStream(configFilePath);
         Yaml yaml = new Yaml();
         Map config = yaml.loadAs(in, Map.class);
-        System.out.println(config);
+        log.info("Client\t配置文件内容为{}", config);
         Map common = (Map) config.get("common");
         String serverAddress = (String) common.get("server_addr");
         Integer serverPort = (Integer) common.get("server_port");
@@ -44,6 +47,11 @@ public class Client {
             Integer localPort = (Integer) natEntry.get("local_port");
             Integer remotePort = (Integer) natEntry.get("remote_port");
             portWantMap.add(new ClientPortMapConfig(name, localIp, localPort, remotePort));
+        }
+        if (config.get(socks5Proxy)!=null){  // 如果需要代理上网
+            Map socks5ProxyMap = (Map) config.get(socks5Proxy);
+            Integer remotePort = (Integer) socks5ProxyMap.get("remote_port");
+            portWantMap.add(new ClientPortMapConfig(socks5Proxy, "127.0.0.1", 0, remotePort));   //本地端口暂时设置为0，等待成功登录到云端后再设置端口
         }
         ClientConfig clientConfig = new ClientConfig(serverAddress, serverPort, token, portWantMap);
         System.out.println(portWantMap);
@@ -85,13 +93,21 @@ public class Client {
                 byte[] portsBytes = new byte[clientConfig.portMap.size()*4];
                 for (int i = 0; i < clientConfig.portMap.size(); i++) {     // 写云端口
                     byte[] temp = ByteUtil.intToByteArray(clientConfig.portMap.get(i).remotePort);
-                    for (int j = 0; j < 4; j++) {
-                        portsBytes[i*4+j] = temp[j];
-                    }
+                    System.arraycopy(temp, 0, portsBytes, i * 4, 4);
                 }
                 byte[] encryptedPortsBytes = aesUtil.encrypt(portsBytes);
                 out.write(ByteUtil.intToByteArray(encryptedPortsBytes.length));    // 写端口数组长度
                 out.write(encryptedPortsBytes);     // 写端口
+                // TODO: 判断云端是否接收成功，各端口是否成功监听
+                for (ClientPortMapConfig clientPortMapConfig : clientConfig.portMap) {
+                    if (clientPortMapConfig.getName().equals(socks5Proxy)){  // 查看是否需要socks5_proxy代理
+                        ServerSocket socks5ProxyServerSocket = new ServerSocket(0); // 指定为0端口将会随机绑定一个端口
+                        clientPortMapConfig.setLocalPort(socks5ProxyServerSocket.getLocalPort());   // 设置映射端口
+                        new Thread(new Socks5ProxyListener(socks5ProxyServerSocket, client2serverSocket),
+                                "Socks5ProxyListener-bind-port"+socks5ProxyServerSocket.getLocalPort()).start();  // 开启本地代理监听
+                        break;
+                    }
+                }
                 Thread workThread = new Thread(new ClientGetEventHandler(client2serverSocket), "ClientGetEvent"+client2serverSocket.getRemoteSocketAddress());
                 workThread.start(); // 开启事件监听
                 workThread.join();  // 等待线程结束
