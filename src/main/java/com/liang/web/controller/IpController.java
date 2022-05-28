@@ -6,10 +6,12 @@ import com.liang.web.utils.IpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -49,15 +51,26 @@ public class IpController {
         return "redirect:/ipList";
     }
 
-    @GetMapping("/delete/{ip}")
-    public String delete(@PathVariable String ip){
+    @GetMapping("/delete/**")   // 因为IP内容存在特殊符号‘/’，例如"192.168.0.0/24"，传统@PathVariable获取不全，所以用AntPathMatcher
+    public String delete(HttpServletRequest request){
+        final String pathq =
+                request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE).toString();
+        final String bestMatchingPattern =
+                request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE).toString();
+        String ip = new AntPathMatcher().extractPathWithinPattern(bestMatchingPattern,pathq);
         ipService.deleteByIp(ip);
         System.out.println("删除了IP：" + ip);
         return "redirect:/ipList";
     }
 
-    @GetMapping("/updatePage/{ip}")
-    public String updatePage(@PathVariable String ip, Model model){
+    @GetMapping("/updatePage/**")
+    public String updatePage(HttpServletRequest request, Model model){
+        final String pathq =
+                request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE).toString();
+        final String bestMatchingPattern =
+                request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE).toString();
+        String ip = new AntPathMatcher().extractPathWithinPattern(bestMatchingPattern,pathq);
+
         IpEntity allowedIp = ipService.getByIp(ip);
         model.addAttribute("ip", allowedIp);
         return "updatePage";
