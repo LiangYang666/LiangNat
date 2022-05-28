@@ -6,6 +6,7 @@ create table allowed_ip(
     comment vchar(100) -- 备注
 );
 insert into allowed_ip values('127.0.0.1', '本地回环', '2022-5-1', '允许本地回环');
+insert into allowed_ip values('0:0:0:0:0:0:0:1', '本地回环', '2022-5-1', '测试1');
 insert into allowed_ip values('192.168.0.1', null, '2022-5-1', '测试1');
 insert into allowed_ip values('192.168.0.2', null, '2022-5-2', '测试2');
 insert into allowed_ip values('192.168.0.3', null, '2022-5-3', '测试3');
