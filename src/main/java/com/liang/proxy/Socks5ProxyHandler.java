@@ -126,29 +126,45 @@ public class Socks5ProxyHandler implements Runnable {
         return true;
     }
 
-    @Override
-    public void run() {
-        Socket agentSocket = null;
+    public boolean transferPrepared() {
         try {
             InputStream input = socketProxyTransfer.getInputStream();
             OutputStream output = socketProxyTransfer.getOutputStream();
+
             if (handleSocks5Handshake(input, output)){
                 if (handleSocks5Connection(input, output)){
-                    agentSocket = new Socket(remoteAddress, remotePort); // 代理socket 即真正访问目标资源的socket
-                    Thread th1 = new Thread(new StreamForwardHandler(input, agentSocket.getOutputStream()), "Socks5Forward-" + socketProxyTransfer + "-->" + agentSocket);
-                    Thread th2 = new Thread(new StreamForwardHandler(agentSocket.getInputStream(), output), "Socks5Forward-" + agentSocket + "-->" + socketProxyTransfer);
-                    th1.start();
-                    th2.start();
-                    th1.join();
-                    th2.join();
+                    return true;
                 } else {
                     log.trace("Socks5\t连接失败");
                 }
             } else {
                 log.trace("Socks5\t握手失败");
             }
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            log.trace("Socks5\t握手或连失败", e);
+        }
+        return false;
+    }
+
+    @Override
+    public void run() {
+
+        Socket agentSocket = null;
+        if (transferPrepared()){
+
+            try {
+                agentSocket = new Socket(remoteAddress, remotePort); // 代理socket 即真正访问目标资源的socket
+                InputStream input = socketProxyTransfer.getInputStream();
+                OutputStream output = socketProxyTransfer.getOutputStream();
+                Thread th1 = new Thread(new StreamForwardHandler(input, agentSocket.getOutputStream()), "Socks5Forward-" + socketProxyTransfer + "-->" + agentSocket);
+                Thread th2 = new Thread(new StreamForwardHandler(agentSocket.getInputStream(), output), "Socks5Forward-" + agentSocket + "-->" + socketProxyTransfer);
+                th1.start();
+                th2.start();
+                th1.join();
+                th2.join();
+            } catch (IOException | InterruptedException e) {
+                log.trace("Socks5\t代理服务异常", e);
+            }
         }
         log.trace("Socks5\t关闭本次代理连接{}",socketProxyTransfer);
         try {

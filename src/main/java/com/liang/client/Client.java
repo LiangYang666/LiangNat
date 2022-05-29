@@ -102,10 +102,13 @@ public class Client {
                 ServerSocket socks5ProxyServerSocket = null;
                 for (ClientPortMapConfig clientPortMapConfig : clientConfig.portMap) {
                     if (clientPortMapConfig.getName().equals(socks5Proxy)){  // 查看是否需要socks5_proxy代理
-                        socks5ProxyServerSocket = new ServerSocket(0); // 指定为0端口将会随机绑定一个端口
-                        clientPortMapConfig.setLocalPort(socks5ProxyServerSocket.getLocalPort());   // 设置映射端口
-                        new Thread(new Socks5ProxyListener(socks5ProxyServerSocket, client2serverSocket),
-                                "Socks5ProxyListener-bind-port"+socks5ProxyServerSocket.getLocalPort()).start();  // 开启本地代理监听
+                        Socks5ProxyListener proxyListener = new Socks5ProxyListener();
+                        socks5ProxyServerSocket  = proxyListener.getListenSocket();
+                        if (socks5ProxyServerSocket != null){
+                            clientPortMapConfig.setLocalPort(socks5ProxyServerSocket.getLocalPort());   // 设置映射端口
+                            new Thread(proxyListener,
+                                    "Socks5ProxyListener-bind-port-"+socks5ProxyServerSocket.getLocalPort()).start();  // 开启本地代理监听
+                        }
                         break;
                     }
                 }
