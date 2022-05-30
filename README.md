@@ -1,7 +1,8 @@
 # LiangNat
 ## 简介
 使用java网络编程实现内网穿透/端口映射,分为服务端和客户端，类似于frp， 概念介绍及程序设计思路详情见[博客网址](https://blog.csdn.net/qq_39165617/article/details/124641503?spm=1001.2014.3001.5501)
-
+1. 更新了web后台管理，能够管理允许登录的IP，设置IP白名单防火墙
+2. 更新了代理上网功能，能够代理内网，例如实现在校外访问校园内网才能访问的网站
 ## 使用
 ### 1.1 测试使用
 1. 上线使用时，可直接在[GitHub releases](https://github.com/LiangYang666/LiangNat/releases)中下载使用，也可以自行修改编译出来进行使用
@@ -11,6 +12,11 @@
    common:
      bind_port: 10101    # 服务端口  可更换，保持与客户端一致即可
      token: 123456       # 密码
+   
+   web:
+     bind_port: 10102  # 网页管理登录端口，可管理IP白名单 浏览器输入server_addr:10102可登录
+     username: admin   # 登录用户名
+     password: 123456  # 登录密码
    ```
 4. 将`NatClient-v1.jar`和`config_client.yaml`放置于局域网内的电脑的某个文件夹NatSoft内，修改`config_client.yaml`，更改想要映射的端口和云服务器的IP密码等，执行 `java -jar NatClient-v1.jar`即可
    配置内容示例如下
@@ -21,22 +27,27 @@
      token: 123456         # 登录密码 与服务端配置一致
    
    nat:
-     ssh-1:
-       type: tcp
-       local_ip: 127.0.0.1 # 需要被映射的内网机器的IP 可以映射内网中任何可达的主机，这里填的是本机
-       local_port: 22      # 需要被映射的内网机器的端口
-       remote_port: 40022  # 对应的云端服务器映射端口    # 达到的效果是访问 server_addr+40022 相当于局域网内local_ip+local_port
      ssh-2:
        type: tcp
-       local_ip: 192.168.0.202 # 例如映射局域网内的192.168.0.202主机
-       local_port: 22      
-       remote_port: 40023 
+       local_ip: 127.0.0.1 # 需要被映射的内网机器的IP
+       local_port: 22      # 需要被映射的内网机器的端口
+       remote_port: 40022  # 对应的云端服务器映射端口    # 达到的效果是访问 server_addr+40022 相当于局域网内local_ip+local_port
+   
+     vnc-21:
+       type: tcp
+       local_ip: 127.0.0.1
+       local_port: 5901
+       remote_port: 45901
+   
+   socks5_proxy: # 代理 将浏览器的代理或系统代理改为 socks5,server_addr:7999 实现穿透学校内网上网
+     type: tcp
+     remote_port: 7999
 
    ```
 ## 1.2 设置自启动服务
 上面的测试使用在终端断开后将停止运行，因此我们需要注册我们的服务，达到开机自启动，或者手动运行服务后终端掉线依然运行
 ### 1.2.1 服务端开机自启动
-执行`sudo vim /etc/systemd/system/natServer.service`创建服务，编辑如下
+执行`vim /etc/systemd/system/natServer.service`创建服务，编辑如下
 ```bash
 [Unit]
 Description=nat server daemon
@@ -45,6 +56,7 @@ Wants=network.target
 
 [Service]
 Type=simple
+User=name	# 如果是root用户可省略
 WorkingDirectory=/home/name/NatSoft			# 编辑的时候一定要删除注释 这里更改为自己放置jar包和配置的绝对路径
 ExecStart=/path/to/your/java -jar NatServer-v1.jar	# 编辑的时候一定要删除注释 这里更改为自己在java命令的安装位置 可使用 which java查看
 Restart= always
@@ -53,7 +65,6 @@ RestartSec=1min
 WantedBy=multi-user.target
 ```
 执行如下
-
 ```bash
 #启动natServer
 systemctl daemon-reload
@@ -72,6 +83,7 @@ Wants=network.target
 
 [Service]
 Type=simple
+User=name	# 编辑的时候一定要删除注释 这样可以使得进程归用户所有，使用jps查看时可以查看到，如果不设置，那么普通用户jps查看不到
 WorkingDirectory=/home/name/NatSoft			# 编辑的时候一定要删除注释 这里更改为自己放置jar包和配置文件的绝对路径
 ExecStart=/path/to/your/java -jar NatClient-v1.jar # 编辑的时候一定要删除注释 这里更改为自己在java命令的安装位置 可使用 which java查看
 Restart= always
