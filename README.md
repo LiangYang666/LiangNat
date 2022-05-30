@@ -100,6 +100,15 @@ systemctl start natClient
 #设置为开机启动
 systemctl enable natClient
 ```
+### 1.2.3 IP白名单防火墙管理
+1. 输入你设置的web管理端口，server_addr:10102  
+   ![在这里插入图片描述](https://img-blog.csdnimg.cn/22de8f65510d4ce2940623a31501c8b9.png)
+2. IP白名单列表  
+   在里面可以删除和修改每条记录  
+   ![在这里插入图片描述](https://img-blog.csdnimg.cn/c0bf322e7b884e9787a99c9fa33b20de.png)
+3. 添加IP  
+   点击上方添加IP，将进入如下界面，下面的IP自动填充为访问设备的IP，属地为联网查询到并填充的，备注可以手动填写，另外我更新了一种IP过滤策略，一个IP是32位的，当添加IP为`192.168.0.0/24`时，则只需要IP的前24位与给定IP相同即可，即192.168.0开头即可  
+   ![在这里插入图片描述](https://img-blog.csdnimg.cn/ee88f06560d64404a5727996b893fab4.png)
 
 
 # 程序相关解释记录
