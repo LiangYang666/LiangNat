@@ -138,7 +138,7 @@ maven-shade-plugin负责最终的打包操作. 将所有依赖包打包
 
 
 
-## bug 
+## bug记录 
 ### 1
 长时间未使用时 \
 client显示c2s依然是established，  \
@@ -146,4 +146,4 @@ client显示c2s依然是established，  \
 造成client阻塞在read但无法检测到断开连接了 \
 原因
 服务端主机崩溃了，客户端是无法感知到的，在加上客户端没有开启 TCP keepalive，又没有数据交互的情况下，客户端的 TCP 连接将会一直处于 ESTABLISHED 连接状态，当服务端正常上线后，还会依然阻塞在读取而不会关闭连接
-
+解决：增加心跳检测
