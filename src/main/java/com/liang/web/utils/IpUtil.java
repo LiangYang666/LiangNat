@@ -18,21 +18,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class IpUtil {
-    static HttpClient httpClient = new HttpClient();
-    public static String getIpAddress(String ip){
-        String result = "{}";
-        try {
-            result = httpClient.client("http://ip-api.com/json/" + ip + "?lang=zh-CN",
-                    HttpMethod.GET, new LinkedMultiValueMap<>());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        JSONObject jsonObject = JSONObject.parseObject(result);
-        String address = jsonObject.get("country")+","+jsonObject.get("regionName")+","+jsonObject.get("city");
-        System.out.println(address);
-        System.out.println(result);
-        return address;
-    }
+
     public static String getIp(HttpServletRequest request) {
         String ipAddress = null;
         try {
@@ -66,16 +52,7 @@ public class IpUtil {
         } catch (Exception e) {
             ipAddress="";
         }
-
         return ipAddress;
-
     }
 
-}
-class HttpClient {
-    public String client(String url, HttpMethod method, MultiValueMap<String, String> params){
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-        return response.getBody();
-    }
 }

@@ -17,8 +17,11 @@ import java.util.List;
  **/
 @Service
 public class IpService {
+    private final IpDao ipDao;
     @Autowired
-    private IpDao ipDao;
+    public IpService(IpDao ipDao) {
+        this.ipDao = ipDao;
+    }
 
     public List<IpEntity> getAllIp(){
         return ipDao.selectList(null);

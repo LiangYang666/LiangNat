@@ -1,14 +1,16 @@
 package com.liang.web.controller;
 
 import com.liang.web.entity.IpEntity;
+import com.liang.web.entity.IpRegionEntity;
+import com.liang.web.service.Ip2RegionService;
 import com.liang.web.service.IpService;
 import com.liang.web.utils.IpUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.HandlerMapping;
@@ -22,10 +24,15 @@ import java.util.List;
  * @Date: 2022/5/25 下午5:03
  **/
 @Controller
+@Slf4j
 public class IpController {
-
+    private final IpService ipService;
+    private final Ip2RegionService ip2RegionService;
     @Autowired
-    private IpService ipService;
+    public IpController(IpService ipService, Ip2RegionService ip2RegionService) {
+        this.ipService = ipService;
+        this.ip2RegionService = ip2RegionService;
+    }
 
     @GetMapping({"/ipList", "/", "/index"})
     public String table(Model model) {
@@ -37,8 +44,18 @@ public class IpController {
     @RequestMapping("/insertPage")
     public String toInsertPage(HttpServletRequest request, Model model){
         String ip = IpUtil.getIp(request);
-        System.out.println(ip);
-        String ipAddress = IpUtil.getIpAddress(ip);
+        String ipAddress = "null";
+
+        try {
+            IpRegionEntity region = ip2RegionService.getRegion(ip);
+            ipAddress = region.getCountry()+","+
+                        region.getProvince()+","+
+                        region.getCity()+
+                        " ("+region.getIsp()+")";
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
+
         IpEntity ipEntity = new IpEntity(ip, ipAddress, null, null);
         model.addAttribute("ip", ipEntity);
         return "insertPage";
