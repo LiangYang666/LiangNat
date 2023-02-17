@@ -39,7 +39,7 @@
        local_port: 5901
        remote_port: 45901
    
-   socks5_proxy: # 代理 将浏览器的代理或系统代理改为 socks5,server_addr:7999 实现穿透学校内网上网
+   socks5_proxy: # 代理 将浏览器的代理或系统代理改为 socks5,server_addr:7999 实现穿透学校内网上网, 使用edge或chrome时安装SwitchyOmega插件进行代理配置最佳
      type: tcp
      remote_port: 7999
 
