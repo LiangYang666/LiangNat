@@ -12,12 +12,14 @@ public class ClientPortMapConfig {
     public String localIp;
     public int localPort;
     public int remotePort;
+    public boolean firewallProtect;
 
-    public ClientPortMapConfig(String name, String localIp, int localPort, int remotePort) {
+    public ClientPortMapConfig(String name, String localIp, int localPort, int remotePort, boolean firewallProtect) {
         this.name = name;
         this.localIp = localIp;
         this.localPort = localPort;
         this.remotePort = remotePort;
+        this.firewallProtect = firewallProtect;
     }
 
     public String getName() {

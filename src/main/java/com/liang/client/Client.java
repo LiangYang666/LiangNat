@@ -40,18 +40,22 @@ public class Client {
         String token = common.get("token").toString();
         Map<String, Map<String, Object>> natMap = (Map<String, Map<String, Object>>) config.get("nat");
         ArrayList<ClientPortMapConfig> portWantMap = new ArrayList<>();
+        boolean firewallProtect = true;     // 默认所有端口都受服务端设置的ip白名单防火墙保护
         for (String name : natMap.keySet()) {
             Map<String, Object> natEntry = natMap.get(name);
             //
             String localIp = (String) natEntry.get("local_ip");
-            Integer localPort = (Integer) natEntry.get("local_port");
+            Integer localPort = (Integer) natEntry.get("local_port");   // TODO 修复用户输入错误时的情况
             Integer remotePort = (Integer) natEntry.get("remote_port");
-            portWantMap.add(new ClientPortMapConfig(name, localIp, localPort, remotePort));
+            if (natEntry.containsKey("firewall_protect")) {
+                firewallProtect = (Boolean) natEntry.get("firewall_protect");   // 可作设置，受保护或不受保护
+            }
+            portWantMap.add(new ClientPortMapConfig(name, localIp, localPort, remotePort, firewallProtect));
         }
         if (config.get(socks5Proxy)!=null){  // 如果需要代理上网
             Map socks5ProxyMap = (Map) config.get(socks5Proxy);
             Integer remotePort = (Integer) socks5ProxyMap.get("remote_port");
-            portWantMap.add(new ClientPortMapConfig(socks5Proxy, "127.0.0.1", 0, remotePort));   //本地端口暂时设置为0，等待成功登录到云端后再设置端口
+            portWantMap.add(new ClientPortMapConfig(socks5Proxy, "127.0.0.1", 0, remotePort, firewallProtect));   //本地端口暂时设置为0，等待成功登录到云端后再设置端口
         }
         ClientConfig clientConfig = new ClientConfig(serverAddress, serverPort, token, portWantMap);
         System.out.println(portWantMap);
@@ -90,10 +94,11 @@ public class Client {
                 byte[] encryptedToken = aesUtil.encrypt(tokenBytes);
                 out.write(encryptedToken.length);   // 写密码长度
                 out.write(encryptedToken);      // 写密码(并加密)
-                byte[] portsBytes = new byte[clientConfig.portMap.size()*4];
+                byte[] portsBytes = new byte[clientConfig.portMap.size()*5];
                 for (int i = 0; i < clientConfig.portMap.size(); i++) {     // 写云端口
                     byte[] temp = ByteUtil.intToByteArray(clientConfig.portMap.get(i).remotePort);
-                    System.arraycopy(temp, 0, portsBytes, i * 4, 4);
+                    portsBytes[i*5+4] = (byte) (clientConfig.portMap.get(i).firewallProtect?1:0);   // 写防火墙保护标志
+                    System.arraycopy(temp, 0, portsBytes, i * 5, 4);
                 }
                 byte[] encryptedPortsBytes = aesUtil.encrypt(portsBytes);
                 out.write(ByteUtil.intToByteArray(encryptedPortsBytes.length));    // 写端口数组长度

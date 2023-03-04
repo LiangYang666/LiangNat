@@ -6,7 +6,7 @@ common:
 nat:
   ssh-2:
     type: tcp
-    local_ip: 127.0.0.1 # 需要被映射的内网机器的IP
+    local_ip: 127.0.0.1 # 需要被映射的内网机器的IP,可以为局域网中任意机子的ip
     local_port: 22      # 需要被映射的内网机器的端口
     remote_port: 40022  # 对应的云端服务器映射端口    # 达到的效果是访问 server_addr+40022 相当于局域网内local_ip+local_port
 
@@ -15,6 +15,14 @@ nat:
     local_ip: 127.0.0.1
     local_port: 5901
     remote_port: 45901
+
+  api-connect:
+    type: tcp
+    local_ip: 192.168.1.202
+    local_port: 8011
+    remote_port: 8011
+    firewall_protect: false   # 默认为受防火墙保护,即默认为true,设置为false后将不检查连接方的ip,用于接收某些不能确定ip的连接,为保证端口安全尽量在应用层做一些验证
+
 
 socks5_proxy: # 代理 将浏览器的代理或系统代理改为 socks5,server_addr:7999 实现代理学校内网上网
   type: tcp

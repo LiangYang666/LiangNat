@@ -21,9 +21,11 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
     private final Socket server2clientSocket;
     private final int port;
     private final AESUtil aesUtil;
+    private final boolean firewallProtect;
 
-    public ServerListenRemotePortAcceptHandler(ServerSocket listenSocket, Socket server2clientSocket) {
+    public ServerListenRemotePortAcceptHandler(ServerSocket listenSocket, Socket server2clientSocket, boolean firewallProtect) {
         this.listenSocket = listenSocket;
+        this.firewallProtect = firewallProtect;
         port = listenSocket.getLocalPort();
         this.server2clientSocket = server2clientSocket;
         log.info("Server\t开启线程监听云端端口 [{}],与客户端进行信息交互的Socket为{}", port, server2clientSocket);
@@ -32,6 +34,9 @@ public class ServerListenRemotePortAcceptHandler implements Runnable{
 
     public boolean checkIpIfPermission(String ip) throws UnknownHostException {  //判断该IP是否符合
         if(!AllowedIpUtil.ipSets.contains("web_control")){  // 不需要控制
+            return true;
+        }
+        if (!this.firewallProtect){     // 如果该端口不需要设置的防火墙进行保护，那么就直接放行
             return true;
         }
         if (AllowedIpUtil.ipSets.contains(ip)){

@@ -69,8 +69,9 @@ class ServerGetEventHandler implements Runnable{
         }
         byte[] portsBytes = aesUtil.decrypt(portsEncryptedBytes);
         int listenCount = 0;
-        for (int i = 0; i < portsBytes.length/4; i++) {     // 遍历获取每个端口 每个端口占4个字节
-            int port = ByteUtil.byteArrayToInt(portsBytes, i * 4);
+        for (int i = 0; i < portsBytes.length/5; i++) {     // 遍历获取每个端口 每个端口占5个字节,4个字节端口号，1个字节防火墙标志
+            int port = ByteUtil.byteArrayToInt(portsBytes, i * 5);
+            boolean firewallProtect = portsBytes[i * 5 + 4] != 0;
             log.info("Server\t注册并监听映射端口: " + port);
             boolean listenSuccessFlag = false;
             ServerSocket listenSocket=null;
@@ -83,7 +84,7 @@ class ServerGetEventHandler implements Runnable{
             }
             if (listenSuccessFlag) {
                 log.info("Server\t监听端口成功: {}" ,port);
-                Thread thread = new Thread(new ServerListenRemotePortAcceptHandler(listenSocket, server2clientSocket), "Thread-listen["+port+"]");
+                Thread thread = new Thread(new ServerListenRemotePortAcceptHandler(listenSocket, server2clientSocket, firewallProtect), "Thread-listen["+port+"]");
                 thread.start();
                 listenSocketList.add(listenSocket);
                 listenCount++;
