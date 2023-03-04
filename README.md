@@ -1,8 +1,9 @@
 # LiangNat
 ## 简介
 使用java网络编程实现内网穿透/端口映射,分为服务端和客户端，类似于frp， 概念介绍及程序设计思路详情见[博客网址](https://blog.csdn.net/qq_39165617/article/details/124641503?spm=1001.2014.3001.5501)
-1. 更新了web后台管理，能够管理允许登录的IP，设置IP白名单防火墙
-2. 更新了代理上网功能，能够代理内网，例如实现在校外访问校园内网才能访问的网站
+>1. 更新了web后台管理，能够管理允许登录的IP，设置IP白名单防火墙
+>2. 更新了代理上网功能，能够代理内网，例如实现在校外访问校园内网才能访问的网站
+>3. 更新了端口可设置是否受ip白名单防火墙保护，字段如客户端配置文件，例如你需要开放某些端口给别人调用api，但调用你api的ip有很多，没法一一设置白名单，且api应用层做了认证管理，因此该端口不需要受防火墙保护
 ## 使用
 ### 1.1 测试使用
 1. 上线使用时，可直接在[GitHub releases](https://github.com/LiangYang666/LiangNat/releases)中下载使用，也可以自行修改编译出来进行使用
@@ -29,7 +30,7 @@
    nat:
      ssh-2:
        type: tcp
-       local_ip: 127.0.0.1 # 需要被映射的内网机器的IP
+       local_ip: 127.0.0.1 # 需要被映射的内网机器的IP,可以为局域网中任意机子的ip
        local_port: 22      # 需要被映射的内网机器的端口
        remote_port: 40022  # 对应的云端服务器映射端口    # 达到的效果是访问 server_addr+40022 相当于局域网内local_ip+local_port
    
@@ -39,6 +40,13 @@
        local_port: 5901
        remote_port: 45901
    
+     api-connect:
+       type: tcp
+       local_ip: 192.168.1.202
+       local_port: 8011
+       remote_port: 8011
+       firewall_protect: false   # 默认为受防火墙保护,即默认为true,设置为false后将不检查连接方的ip,用于接收某些不能确定ip的连接,为保证端口安全尽量在应用层做一些验证
+
    socks5_proxy: # 代理 将浏览器的代理或系统代理改为 socks5,server_addr:7999 实现穿透学校内网上网, 使用edge或chrome时安装SwitchyOmega插件进行代理配置最佳
      type: tcp
      remote_port: 7999
