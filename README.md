@@ -1,4 +1,6 @@
 # LiangNat
+
+## ✨Star the [Repository](https://github.com/LiangYang666/LiangNat)  
 ## 简介
 使用java网络编程实现内网穿透/端口映射,分为服务端和客户端，类似于frp， 概念介绍及程序设计思路详情见[博客网址](https://blog.csdn.net/qq_39165617/article/details/124641503?spm=1001.2014.3001.5501)
 >1. 更新了web后台管理，能够管理允许登录的IP，设置IP白名单防火墙
